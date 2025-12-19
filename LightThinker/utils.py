@@ -47,7 +47,7 @@ def padding_item(
 ) -> Dict:
     for key in ['input_ids', 'labels']:
         assert key in item
-    assert padding_side in ['left', 'right']
+    assert padding_side in ['left', 'right']#根据推理和训练区分方向
     copy_item = deepcopy(item)
 
     remainder_for_label = [label_padding_id] * (max_length - len(copy_item['labels']))
@@ -69,6 +69,7 @@ def padding_item(
     
     return copy_item
 
+#构建注意力掩码，都是在这里实现的
 def create_attention_for_aug_data(
     input_ids:List[int],
     locate_index_list:List[List[int]],
@@ -85,7 +86,7 @@ def create_attention_for_aug_data(
     # 1-True don't mask
     length = len(input_ids)
     mask = np.ones([length, length], dtype=np.bool)
-    mask = np.tril(mask)
+    mask = np.tril(mask)#下三角矩阵
 
     assert len(locate_index_list) == len(locate_indicator_list)
 
@@ -99,14 +100,14 @@ def create_attention_for_aug_data(
         start, end, l_inst, n_comp, n_continue = index_item
         
         # 1. attention_mask
-        if exclude_continue:
+        if exclude_continue:# 让后续的 Token（未来）无法看到 原始文本 和 压缩指令（过去）
             mask[end+l_inst+n_comp:, start:end+l_inst] = 0
             if pre_n_continue is not None and pre_n_continue != 0:
                 mask[end+l_inst+n_comp:, pre_end+pre_n_inst+pre_n_comp:pre_end+pre_n_inst+pre_n_comp+pre_n_continue] = 0
         else:
             mask[end+l_inst+n_comp:, start:end+l_inst] = 0
 
-        # 1.1 prefill remove compress
+        # 1.1 prefill remove compress（默认为true，可以忽略）
         if not prefill_compress and index_state == 'compressed-prompt':
             mask[0:end+l_inst+n_comp, 0:end+l_inst+n_comp] = np.tri(len(mask[0:end+l_inst+n_comp, 0:end+l_inst+n_comp]), dtype=int)
             # print("prefill:", end+l_inst+n_comp)
@@ -140,7 +141,7 @@ def create_attention_for_aug_data(
         if see_current:
             mask[end+l_inst:end+l_inst+n_comp, 0:start] = 0
 
-    # 5. padding
+    # 5. padding（填充）
     if max_length is not None and max_length > length:
         padding_mask = np.zeros([max_length, max_length], dtype=np.bool)
         padding_mask[:length, :length] = mask

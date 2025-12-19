@@ -14,7 +14,7 @@ def bbh():
     ]
 
     for reader, name in reader_map_list:
-        with jsonlines.open(f"reference/{name}.jsonl", "w") as writer:
+        with jsonlines.open(f"./data/eval/{name}.jsonl", "w") as writer:
             for i in range(len(reader)):
                 answer = str(reader.data_list[i]['answer'])
                 alias = [str(reader.data_list[i]['answer']), "\\text{" + reader.data_list[i]['answer'] + "}"]
@@ -80,7 +80,7 @@ def mmlu():
     ]
 
     for reader, name in reader_map_list:
-        with jsonlines.open(f"reference/{name}.jsonl", "w") as writer:
+        with jsonlines.open(f"./data/eval/{name}.jsonl", "w") as writer:
             for i in range(len(reader)):
                 answer = str(reader.data_list[i]['answer'])
                 alias = [str(reader.data_list[i]['answer']), "\\text{" + reader.data_list[i]['answer'] + "}"]
@@ -112,7 +112,7 @@ def gpqa():
     ]
 
     for reader, name in reader_map_list:
-        with jsonlines.open(f"reference/{name}.jsonl", "w") as writer:
+        with jsonlines.open(f"./data/eval/{name}.jsonl", "w") as writer:
             for i in range(len(reader)):
                 answer = str(reader.data_list[i]['answer'])
                 alias = [str(reader.data_list[i]['answer']), "\\text{" + reader.data_list[i]['answer'] + "}"]
@@ -148,7 +148,7 @@ if __name__ == '__main__':
     ]
 
     for reader, name in reader_map_list:
-        with jsonlines.open(f"reference/{name}.jsonl", "w") as writer:
+        with jsonlines.open(f"./data/eval/{name}.jsonl", "w") as writer:
             for i in range(len(reader)):
                 writer.write(dict(
                     idx=i,

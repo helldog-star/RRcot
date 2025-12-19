@@ -1056,7 +1056,7 @@ def _token_level_generate(
     global_start:int = len(token_utils._whole_input_ids)
     local_start:int = len(token_utils._current_input_ids)
 
-
+    
     assert local_start == kv_utils.get_cache()._seen_tokens, \
         f"{local_start} == {kv_utils.get_cache()._seen_tokens}"
     while predicted_token_id != eos_token_id and new_token_counters < max_new_tokens:

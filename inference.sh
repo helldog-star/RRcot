@@ -15,11 +15,12 @@ eos_token="<|im_end|>"
 compress_config="./configs/LightThinker/qwen/v1.json"
 
 ckpt=5220
-output_tag="YOUR-TAG"
+output_tag="1.5_wo_pretrain"
 # `model_path` is an optional argument
 # if you set the `model_path`, the arguments `ckpt` and `model_tag` will be ignored.
 # see line 1460 of the code in LightThinker/inference.py for more details.
-model_path="/mnt/jinbo/RLRM/lightthinker/output/cosine1.5b-qwen-len_4096-see_cur_false-bi_false-diag_false-mode_aug-wo-pc-prefill_compress_false-hybrid_false-epoch_5-lr_2e-5-bsz_1-accumu_4-warm_r_0.05-warm_s_0-freeze_model_false-train_input_false-qkv_no-ex_con_false/checkpoint-5220"
+# model_path="/mnt/jinbo/RLRM/lightthinker/output/cosine1.5b-qwen-len_4096-see_cur_false-bi_false-diag_false-mode_aug-wo-pc-prefill_compress_false-hybrid_false-epoch_5-lr_2e-5-bsz_1-accumu_4-warm_r_0.05-warm_s_0-freeze_model_false-train_input_false-qkv_no-ex_con_false/checkpoint-5220"
+model_path="/mnt/jinbo/RLRM/model/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B"
 max_new_tokens=10240
 
 root_dir="./LightThinker"

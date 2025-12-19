@@ -317,7 +317,10 @@ class Qwen2Attention(nn.Module):
         query_states = self.q_proj(hidden_states)
         key_states = self.k_proj(hidden_states)
         value_states = self.v_proj(hidden_states)
-
+        
+        #这里是做了压缩???用新的压缩投影层替代原有的，看了下
+        #看完datacollator回来，的确是，这些index代表了压缩的位置，貌似是直接进行替换
+        #但是self.new_q、k、v都是false啊？而且本身attention mask不已经做到这点了吗？
         if self.new_q:
             query_states[row_comp_index, column_comp_index] = self._q_proj(hidden_states[row_comp_index, column_comp_index])
         if self.new_k:
@@ -820,7 +823,7 @@ class Qwen2Model(Qwen2PreTrainedModel):
     Args:
         config: Qwen2Config
     """
-
+    #创建一个新的embedding层
     def freeze_embed(self, new_token_cnt:int, origin_length:int):
         self.origin_length = origin_length
         self.new_token_cnt = new_token_cnt
@@ -898,7 +901,8 @@ class Qwen2Model(Qwen2PreTrainedModel):
                     "will be removed in v4.47. Please convert your cache or use an appropriate `Cache` class "
                     "(https://huggingface.co/docs/transformers/kv_cache#legacy-cache-format)"
                 )
-
+        
+        ##貌似是在这，用新的token替代掉原有的token
         if inputs_embeds is None:
             inputs_embeds = self.embed_tokens(input_ids)
             if self.special_embed != None:

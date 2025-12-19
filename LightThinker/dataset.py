@@ -118,6 +118,7 @@ class MyDataset(torch.utils.data.Dataset):
             self.init()
             self.init_for_aug_data_wo_pc()
     
+    #token level，感觉没用到
     def insert_comp_for_output(self, output:str) -> Tuple[List[str], List[List[int]]]:
         assert self.config.output_comp_level == 'token'
         output_input_ids = self.tokenizer.tokenizer(
@@ -226,6 +227,8 @@ class MyDataset(torch.utils.data.Dataset):
                     indicator_list.append("save")
                     input_ids_list.append(suffix_input_ids)
         elif self.config.prompt_comp_level == 'sentence':
+            #把[Prefix] [Sys Sent1] [Sys Sent2] [Middle] [Q Sent1] [Q Sent2] [Suffix]
+            #压缩成[Prefix] [Comp Token] [Comp Token] [Middle] [Comp Token] [Comp Token] [Suffix]
             step = self.config.prompt_comp_step
             assert step == 1
             question_input_ids_list:List[List[int]] = list()
@@ -334,7 +337,7 @@ class MyDataset(torch.utils.data.Dataset):
                     meta_info=item,
                 )
             )
-
+            #应该是在这里进行数据处理，并进行mask
             # 'save', 'abandoned', 'compressed-prompt', 'compressed-output'
             structured_input:List[List] = list()
             structured_input_indicator:List[List[str]] = list()
@@ -355,7 +358,7 @@ class MyDataset(torch.utils.data.Dataset):
             structured_input.append(prompt_input_ids_list)          # [n_turn, n_sent, n_token_per_sent]
             structured_input_indicator.append(prompt_indicator_list)    # [n_turn, n_sent]
             
-
+            #AE任务的重建数据
             # 1.1 recover prompt part
             assert len(prompt_input_ids_list) == len(prompt_indicator_list)
             # print(prompt_indicator_list)
@@ -432,7 +435,7 @@ class MyDataset(torch.utils.data.Dataset):
                 recover_item
             )
             pbar.update(1)
-
+    #不压缩prompt
     def init_for_aug_data_wo_pc(self, system_compression:bool=False):
         pbar = tqdm(total=len(self.meta_data))
         for item in self.meta_data:
@@ -864,7 +867,8 @@ class MyDataCollator:
                 final['column_comp_index']
             ),
         )
-
+    
+    
     def _aug_mode_wo_pc(self, instances:List[Tuple]) -> Dict:
         final = dict(
             input_ids=list(),
