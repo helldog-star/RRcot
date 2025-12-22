@@ -4,7 +4,7 @@ import time
 import argparse
 from typing import List, Dict
 from tqdm import tqdm
-from transformers import AutoTokenizer  # 新增：用于手动应用 chat template
+from transformers import AutoTokenizer  
 
 # 1. 设定 GPU 环境变量
 os.environ["CUDA_VISIBLE_DEVICES"] = "0,1,2,3"
@@ -27,7 +27,7 @@ def get_args():
     parser.add_argument("--output_dir", type=str, default="results", help="Directory to save results")
     parser.add_argument("--tp_size", type=int, default=4, help="Tensor Parallelism size")
     parser.add_argument("--batch_size", type=int, default=512, help="Batch size for progress bar updates")
-    parser.add_argument("--extend_name", type=str, default="Your_tag", help="Set for ")
+    parser.add_argument("--extend_name", type=str, default="Your_tag", help="Sub-folder name")
     return parser.parse_args()
 
 def main():
@@ -50,8 +50,8 @@ def main():
         "temperature": 0,
         "max_new_tokens": 10240,
     }
-
-    os.makedirs(args.output_dir, exist_ok=True)
+    final_save_dir = os.path.join(args.output_dir, args.extend_name)
+    os.makedirs(final_save_dir, exist_ok=True)
 
     for dataset_name in args.datasets:
         if dataset_name not in DATASET_MAPPING:
@@ -66,7 +66,7 @@ def main():
         
         # 准备数据容器
         prompts_text_batch = [] # 存放处理好模板的字符串
-        original_messages_batch = [] # 存放原始 messages 结构用于保存
+        original_messages_batch = [] # 存放messages 结构用于保存
         indices = []
         gt_answers = []
 
@@ -78,7 +78,7 @@ def main():
             user_prompt = reader.get_prompt(i)
             
             messages = [
-                {"role": "system", "content": system_prompt},
+                # {"role": "system", "content": system_prompt}, #对于r1-distall,无需system-prompt
                 {"role": "user", "content": user_prompt}
             ]
             
@@ -112,7 +112,6 @@ def main():
         for i in tqdm(range(0, len(prompts_text_batch), args.batch_size), desc=f"Infer {dataset_name}"):
             batch_prompts = prompts_text_batch[i : i + args.batch_size]
             
-            # 关键修复：使用 generate 而不是 chat
             batch_outputs = engine.generate(
                 batch_prompts,
                 sampling_params=sampling_params
@@ -123,7 +122,7 @@ def main():
         avg_time = total_time / len(prompts_text_batch) if len(prompts_text_batch) > 0 else 0
         print(f"      Inference finished. Avg time per sample: {avg_time:.4f}s")
 
-        out_file = os.path.join(args.output_dir+"/"+args.extend_name, f"{dataset_name}_result.jsonl")
+        out_file = os.path.join(final_save_dir, f"{dataset_name}_result.jsonl")
         print(f"      Processing results and saving to {out_file}...")
         
         with open(out_file, "w", encoding="utf-8") as f:
@@ -132,6 +131,8 @@ def main():
                 gt = gt_answers[i]
                 messages = original_messages_batch[i]
                 
+                prompt_text = prompts_text_batch[i]
+
                 model_output = output_obj["text"]
                 
                 # 获取 metadata
@@ -153,6 +154,7 @@ def main():
 
                 result_entry = {
                     "idx": idx,
+                    "prompt": prompt_text,
                     "model_answer": extracted_answer,
                     "gt_answer": gt,
                     "acc_state": is_correct,
