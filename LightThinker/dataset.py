@@ -62,6 +62,10 @@ class MyDataset(torch.utils.data.Dataset):
                     os.makedirs(cache_dir, exist_ok=True)
             
             self.cache_path = os.path.join(cache_dir, cache_filename)
+            if use_EPL:
+                self.cache_path = self.cache_path.replace(".pt", "_EPL.pt")
+            else:
+                self.cache_path = self.cache_path
         else:
             self.cache_path = None
 

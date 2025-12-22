@@ -28,6 +28,7 @@ sglang_inference_results/
 *debug*
 
 # Data
+data/*
 data/train/dataset_cache/
 output/
 EOF
