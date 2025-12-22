@@ -46,6 +46,24 @@ from LightThinker.utils import _print, IGNORE_LABEL_ID, str2bool
 from tokenizer import Tokenizer
 from dataset import MyDataset, MyDataCollator
 
+from transformers import TrainerCallback
+
+class SaveTokenizerCallback(TrainerCallback):
+    """保存checkpoint同时保存tokenizer"""
+    
+    def __init__(self, tokenizer):
+        self.tokenizer = tokenizer
+    
+    def on_save(self, args, state, control, **kwargs):
+        """在保存checkpoint时调用"""
+        checkpoint_folder = os.path.join(
+            args.output_dir,
+            f"checkpoint-{state.global_step}"
+        )
+        
+        if os.path.exists(checkpoint_folder):
+            self.tokenizer.save_pretrained(checkpoint_folder)
+
 def get_parser():
     parser = argparse.ArgumentParser()
     parser.add_argument('--local_rank', type=int, help="just used for deepspeed.")
@@ -185,8 +203,7 @@ def get_dataset_and_data_collator(
         cache_dir=cache_dir,
         cache_filename=cache_filename,
         force_preprocess=False,
-        local_rank=local_rank,
-        use_EPL=args.use_EPL
+        local_rank=local_rank
     )
 
     data_collator = MyDataCollator(
@@ -272,7 +289,8 @@ def main():
         model=model,
         train_dataset=dataset,
         args=training_config,
-        data_collator=data_collator
+        data_collator=data_collator,
+        callbacks=[SaveTokenizerCallback(tokenizer)]  # 添加回调
     )
     # 在加载检查点时使用上下文管理器
     if resume_from_checkpoint:
