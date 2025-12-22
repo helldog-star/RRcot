@@ -1,7 +1,8 @@
+export PYTHONPATH=$PYTHONPATH:$(pwd)
 # model 
 model_type="qwen"
-tokenizer_path="/mnt/jinbo/RLRM/model/Qwen/Qwen2.5-7B-Instruct" #0.5B
-model_path="/mnt/jinbo/RLRM/model/deepseek-ai/DeepSeek-R1-Distill-Qwen-1.5B" #1
+tokenizer_path="/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct"
+model_path="/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/DeepSeek-R1-Distill-Qwen-1.5B" 
 bos_token="<|im_start|>"
 eos_token="<|im_end|>"
 conf_version="v1"
@@ -10,19 +11,17 @@ conf_version="v1"
 max_length=4096
 lr_scheduler_type="cosine"
 epochs=5   #change to 1 for test
-lr=1e-5   #vanilla 1e-5  anllm lightthinker 2e-5
+lr=2e-5
 save_steps=2
 deepspeed="./configs/ds_z3_offload_config.json"
-micro_batch_size=1
-gradient_accumulation_steps=4
+micro_batch_size=8
+gradient_accumulation_steps=2
 warmup_ratio=0.05
-#控制训练模式
-# mode="aug-wo-pc" 
-mode="normal"
+mode="aug-wo-pc"
 warmup_steps=0
 
 # others
-model_size="1.5b_model_7b_tokenzier_normal"
+model_size="1.5b"
 init_tag=""
 train_path="./data/train/train.jsonl"
 see_current="false"
@@ -68,7 +67,7 @@ echo "init_tag=${init_tag}"
 
 att_info="${model_size}-${model_type}-len_${max_length}-see_cur_${see_current}-bi_${bi_directional}-diag_${diagonal}-mode_${mode}"
 train_info="prefill_compress_${prefill_compress}-hybrid_${hybrid}-epoch_${epochs}-lr_${lr}-bsz_${micro_batch_size}-accumu_${gradient_accumulation_steps}-warm_r_${warmup_ratio}-warm_s_${warmup_steps}-freeze_model_${freeze_model}-train_input_${train_on_input}-qkv_${qkv}-ex_con_${exclude_continue}"
-output_dir="output/${init_tag}-${lr_scheduler_type}-${att_info}-${train_info}"
+output_dir="output/${init_tag}${lr_scheduler_type}${att_info}-${train_info}"
 compress_config="configs/LightThinker/${model_type}/${conf_version}.json"
 
 deepspeed --include localhost:0,1,2,3 LightThinker/train.py \

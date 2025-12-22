@@ -1,1 +1,26 @@
+# Model
 ./model/*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Data
+data/train/dataset_cache/
+output/
+EOF

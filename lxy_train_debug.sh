@@ -1,6 +1,7 @@
+export PYTHONPATH=$PYTHONPATH:$(pwd)
 # model 
 model_type="qwen"
-tokenizer_path="/mnt/jinbo/RLRM/model/Qwen/Qwen2.5-7B-Instruct"
+tokenizer_path="/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct"
 model_path="/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/DeepSeek-R1-Distill-Qwen-1.5B" 
 bos_token="<|im_start|>"
 eos_token="<|im_end|>"
@@ -11,16 +12,16 @@ max_length=4096
 lr_scheduler_type="cosine"
 epochs=5   #change to 1 for test
 lr=2e-5
-save_steps=1
+save_steps=2
 deepspeed="./configs/ds_z3_offload_config.json"
-micro_batch_size=1
-gradient_accumulation_steps=4
+micro_batch_size=8
+gradient_accumulation_steps=2
 warmup_ratio=0.05
 mode="aug-wo-pc"
 warmup_steps=0
 
 # others
-model_size="1.5b_model_7b_tokenzier"
+model_size="1.5b"
 init_tag=""
 train_path="./data/train/train_debug.jsonl"
 see_current="false"
@@ -69,7 +70,7 @@ train_info="prefill_compress_${prefill_compress}-hybrid_${hybrid}-epoch_${epochs
 output_dir="output/${init_tag}${lr_scheduler_type}${att_info}-${train_info}"
 compress_config="configs/LightThinker/${model_type}/${conf_version}.json"
 
-deepspeed --include localhost:1,2,3,4 LightThinker/train.py \
+deepspeed --include localhost:0,1,2,3 LightThinker/train.py \
     --model_type $model_type \
     --model_path $model_path \
     --tokenizer_path $tokenizer_path \

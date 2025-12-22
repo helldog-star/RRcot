@@ -182,7 +182,7 @@ def get_dataset_and_data_collator(
         output_compress_instruction=args.output_compress_instruction,
         cache_dir=cache_dir,
         cache_filename=cache_filename,
-        force_preprocess=False,
+        force_preprocess=True,
         local_rank=local_rank
     )
 
