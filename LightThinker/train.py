@@ -80,6 +80,8 @@ def get_parser():
     parser.add_argument('--warmup_ratio', type=float, default=0.)
     parser.add_argument('--warmup_steps', type=int, default=0)
     parser.add_argument('--lr_scheduler_type', type=str, default='linear')
+
+    parser.add_argument('--use_EPL', type=str2bool, default=False)
     args = parser.parse_args()
     return args
 
@@ -182,8 +184,9 @@ def get_dataset_and_data_collator(
         output_compress_instruction=args.output_compress_instruction,
         cache_dir=cache_dir,
         cache_filename=cache_filename,
-        force_preprocess=True,
-        local_rank=local_rank
+        force_preprocess=False,
+        local_rank=local_rank,
+        use_EPL=args.use_EPL
     )
 
     data_collator = MyDataCollator(

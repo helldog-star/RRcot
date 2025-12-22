@@ -3,6 +3,7 @@ from transformers import AutoTokenizer
 from typing import *
 from LightThinker.utils import _print, IGNORE_LABEL_ID
 from copy import deepcopy
+import numpy as np
 
 
 class Tokenizer:
@@ -124,6 +125,7 @@ class Tokenizer:
         train_on_input:bool=False,
         check_consistency:bool=False,
         recover_mode:bool=False,
+        use_EPL:bool=False
     ) -> Tuple[List[Dict], Dict]:
         # 1. tokenize
         whole_input = ""
@@ -215,16 +217,45 @@ class Tokenizer:
                                 n_continue
                             ]
                         )
-                for k in range(len(tokenized_label_list[i][j])):
-                    if len(final_item['input_ids']) >= max_length:
-                        break
-                    final_item['position_ids'].append(len(final_item['input_ids']))
-                    final_item['input_ids'].append(
-                        tokenized_input_id_list[i][j][k]
-                    )
-                    final_item['labels'].append(
-                        tokenized_label_list[i][j][k]
-                    )
+
+                        # 如果是 compressed-output, 生成均匀分布 position_ids（根据代码来看感觉compressed-output部分只包含了compressed-token和continue-token）
+                        if use_EPL and structured_input_indicator[i][j+1] == 'compressed-output':
+                            n_abandoned = len(tokenized_input_id_list[i][j])
+                            n_compressed = n_comp
+                            # 压缩率为偶数时强制+1改成奇数
+                            compression_ratio = max(n_abandoned // n_compressed - (1 if (n_abandoned // n_compressed) % 2 == 0 else 0), 1)
+                            # 均匀映射到 abandoned 段: 从len(position_ids) 到 len(position_ids) + n_abandoned -1 之间
+                            start_pos = len(final_item['input_ids']) + (compression_ratio - 1) // 2
+                            end_pos = len(final_item['input_ids']) + n_abandoned
+                            compressed_positions = list(range(start_pos, end_pos, compression_ratio))[:n_compressed]
+                        else:
+                            compressed_positions = None
+                if use_EPL and structured_input_indicator[i][j] == 'compressed-output' and compression_ratio!= 1:
+                    for k in range(len(tokenized_label_list[i][j])):
+                        if len(final_item['input_ids']) >= max_length:
+                            break
+                        # position_id 逻辑
+                        if structured_input_indicator[i][j] == 'compressed-output' and compressed_positions is not None and n_compressed!=0:
+                            # 为了处理continue token
+                            n_compressed = n_compressed - 1
+                            # 使用均匀分布位置
+                            final_item['position_ids'].append(compressed_positions[k])
+                        else:
+                            final_item['position_ids'].append(end_pos)
+                        
+                        final_item['input_ids'].append(tokenized_input_id_list[i][j][k])
+                        final_item['labels'].append(tokenized_label_list[i][j][k])
+                else:
+                    for k in range(len(tokenized_label_list[i][j])):
+                        if len(final_item['input_ids']) >= max_length:
+                            break
+                        final_item['position_ids'].append(len(final_item['input_ids']))
+                        final_item['input_ids'].append(
+                            tokenized_input_id_list[i][j][k]
+                        )
+                        final_item['labels'].append(
+                            tokenized_label_list[i][j][k]
+                        )
       
         # 4. recover
         # we do not use revover mode

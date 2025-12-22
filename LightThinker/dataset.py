@@ -27,7 +27,8 @@ class MyDataset(torch.utils.data.Dataset):
         cache_dir: str = None,  # 启用缓存
         cache_filename: str=None, #存储文件
         force_preprocess: bool = False,  # 设置为True可强制重新预处理
-        local_rank: int = 0 
+        local_rank: int = 0,
+        use_EPL=False
     ):
         self.check_consistency = False
         self.train_on_input:bool = train_on_input
@@ -47,6 +48,8 @@ class MyDataset(torch.utils.data.Dataset):
         self.aug_data_wo_prompt_comp:List[Dict] = list()
 
         self.output_compress_instruction:str = output_compress_instruction if output_compress_instruction != None else ""
+
+        self.use_EPL = use_EPL
         
         # 1. 获取当前进程的 Rank (如果是单卡运行，默认 Rank 为 0)
         self.local_rank = local_rank
@@ -514,6 +517,7 @@ class MyDataset(torch.utils.data.Dataset):
                 train_on_input=self.train_on_input,
                 check_consistency=self.check_consistency,
                 recover_mode=True,
+                use_EPL=self.use_EPL
             )
 
             self.aug_data_wo_prompt_comp.append(
@@ -1048,7 +1052,8 @@ if __name__ == '__main__':
         output_compress_instruction="",
         cache_dir="",  # 启用缓存
         cache_filename=None,
-        force_preprocess=False  # 设置为True可强制重新预处理
+        force_preprocess=False,  # 设置为True可强制重新预处理
+        use_EPL=False
     )
 
     data_collator = MyDataCollator(
