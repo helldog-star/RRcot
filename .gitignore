@@ -31,4 +31,5 @@ data/train/dataset_cache/
 output/
 EOF
 data/train/train.jsonl
+data/train/train_debug.jsonl
 data/train/data.zip
