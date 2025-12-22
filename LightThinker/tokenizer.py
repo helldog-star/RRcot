@@ -186,7 +186,8 @@ class Tokenizer:
             position_ids=list(),
             locate_indicator=list()
         )
-
+        compression_count = 0
+        subtract_compressed_token = False
         for i in range(len(tokenized_label_list)):
             if len(final_item['input_ids']) >= max_length:
                 break
@@ -224,13 +225,16 @@ class Tokenizer:
                             n_compressed = n_comp
                             # 压缩率为偶数时强制+1改成奇数
                             compression_ratio = max(n_abandoned // n_compressed - (1 if (n_abandoned // n_compressed) % 2 == 0 else 0), 1)
+                            print(compression_ratio)
                             # 均匀映射到 abandoned 段: 从len(position_ids) 到 len(position_ids) + n_abandoned -1 之间
-                            start_pos = len(final_item['input_ids']) + (compression_ratio - 1) // 2
-                            end_pos = len(final_item['input_ids']) + n_abandoned
+                            # 这里减去压缩Token的使用总数量，第一次压缩时不需要考虑
+                            start_pos = len(final_item['input_ids']) + (compression_ratio - 1) // 2 - compression_count
+                            end_pos = len(final_item['input_ids']) + n_abandoned - compression_count
                             compressed_positions = list(range(start_pos, end_pos, compression_ratio))[:n_compressed]
                         else:
                             compressed_positions = None
                 if use_EPL and structured_input_indicator[i][j] == 'compressed-output' and compression_ratio!= 1:
+                    compression_count += n_compressed
                     for k in range(len(tokenized_label_list[i][j])):
                         if len(final_item['input_ids']) >= max_length:
                             break
@@ -249,7 +253,7 @@ class Tokenizer:
                     for k in range(len(tokenized_label_list[i][j])):
                         if len(final_item['input_ids']) >= max_length:
                             break
-                        final_item['position_ids'].append(len(final_item['input_ids']))
+                        final_item['position_ids'].append(len(final_item['input_ids']) - compression_count)
                         final_item['input_ids'].append(
                             tokenized_input_id_list[i][j][k]
                         )

@@ -1,6 +1,7 @@
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false" 
-
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import argparse
 import torch
 from typing import *
@@ -36,10 +37,10 @@ else:
 
 
 
-deepspeed.init_distributed(
-    dist_backend='nccl', 
-    timeout=timedelta(minutes=120) 
-)
+# deepspeed.init_distributed(
+#     dist_backend='nccl', 
+#     timeout=timedelta(minutes=120) 
+# )
 
 from config import Config
 from LightThinker.utils import _print, IGNORE_LABEL_ID, str2bool
