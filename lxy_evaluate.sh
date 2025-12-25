@@ -9,9 +9,7 @@ DEFAULT_DATASET="gsm8k"
 DEFAULT_BOS_TOKEN="<|im_start|>"
 DEFAULT_EOS_TOKEN="<|im_end|>"
 DEFAULT_CACHE_SIZE=1024
-DEFAULT_FOLDER="inf_lightthinker_r1distillqwen1.5b"
-DEFAULT_CKPT=1305
-DEFAULT_NUM_FILES=4
+DEFAULT_BASE_PATH=""
 DEFAULT_INTERACTION="false"
 
 # 帮助信息
@@ -30,15 +28,14 @@ Options:
     --bos_token         BOS token (default: ${DEFAULT_BOS_TOKEN})
     --eos_token         EOS token (default: ${DEFAULT_EOS_TOKEN})
     --cache_size        Cache size (default: ${DEFAULT_CACHE_SIZE})
-    --folder            Result folder name (default: ${DEFAULT_FOLDER})
-    --ckpt              Checkpoint number (default: ${DEFAULT_CKPT})
-    --num_files         Number of files to combine (default: ${DEFAULT_NUM_FILES})
+    --base_path         Base path containing .jsonl files (REQUIRED)
     --interaction       Enable interaction mode (flag, default: disabled)
     --help              Show this help message
 
 Example:
-    $0 --dataset mmlu --ckpt 2000 --num_files 8
-    $0 --method normal --dataset gpqa --num_files 2 --interaction
+    $0 --base_path inference_results/inf_lighthinker_epl_r1distillqwen1.5b/gsm8k/1310
+    $0 --method normal --dataset gpqa --base_path results/my_model/gpqa/2000
+    $0 --base_path results/exp1 --dataset mmlu --interaction
 EOF
     exit 0
 }
@@ -52,9 +49,7 @@ dataset="$DEFAULT_DATASET"
 bos_token="$DEFAULT_BOS_TOKEN"
 eos_token="$DEFAULT_EOS_TOKEN"
 cache_size="$DEFAULT_CACHE_SIZE"
-folder="$DEFAULT_FOLDER"
-ckpt="$DEFAULT_CKPT"
-num_files="$DEFAULT_NUM_FILES"
+base_path="$DEFAULT_BASE_PATH"
 interaction="$DEFAULT_INTERACTION"
 
 while [[ $# -gt 0 ]]; do
@@ -91,16 +86,8 @@ while [[ $# -gt 0 ]]; do
             cache_size="$2"
             shift 2
             ;;
-        --folder)
-            folder="$2"
-            shift 2
-            ;;
-        --ckpt)
-            ckpt="$2"
-            shift 2
-            ;;
-        --num_files)
-            num_files="$2"
+        --base_path)
+            base_path="$2"
             shift 2
             ;;
         --interaction)
@@ -118,12 +105,21 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
+# 检查必需参数
+if [ -z "$base_path" ]; then
+    echo "Error: --base_path is required"
+    echo "Use --help for usage information"
+    exit 1
+fi
+
+# 检查路径是否存在
+if [ ! -d "$base_path" ]; then
+    echo "Error: Directory does not exist: $base_path"
+    exit 1
+fi
+
 # 设置 PYTHONPATH
 export PYTHONPATH=$PYTHONPATH:$(pwd)
-
-# 构建文件路径数组
-files=()
-base_path="inference_results/${folder}/${dataset}/${ckpt}"
 
 echo "=========================================="
 echo "Evaluation Configuration:"
@@ -131,31 +127,38 @@ echo "=========================================="
 echo "Method:         $method"
 echo "Model Type:     $model_type"
 echo "Dataset:        $dataset"
-echo "Checkpoint:     $ckpt"
-echo "Folder:         $folder"
-echo "Num Files:      $num_files"
+echo "Base Path:      $base_path"
 echo "Cache Size:     $cache_size"
 echo "Interaction:    $interaction"
 echo "=========================================="
 echo ""
 
-# 自动生成文件路径
-echo "Generating file paths..."
-for ((i=1; i<=num_files; i++)); do
-    file_path="${base_path}/${i}-${num_files}${folder}.jsonl"
-    
-    # 只添加存在的文件
-    if [ -f "$file_path" ]; then
-        files+=("$file_path")
-        echo "  ✓ File $i: $file_path"
-    else
-        echo "  ✗ File $i: $file_path (NOT FOUND - SKIPPED)"
-    fi
+# 自动查找所有 .jsonl 文件
+echo "Searching for .jsonl files in: $base_path"
+files=()
+
+# 使用 find 查找所有 .jsonl 文件并排序
+while IFS= read -r -d '' file; do
+    files+=("$file")
+done < <(find "$base_path" -maxdepth 1 -name "*.jsonl" -type f -print0 | sort -z)
+
+# 检查是否找到文件
+if [ ${#files[@]} -eq 0 ]; then
+    echo ""
+    echo "=========================================="
+    echo "✗ Error: No .jsonl files found in $base_path"
+    echo "=========================================="
+    exit 1
+fi
+
+echo "Found ${#files[@]} .jsonl file(s):"
+for file in "${files[@]}"; do
+    echo "  ✓ $(basename "$file")"
 done
 
 echo ""
 echo "=========================================="
-echo "Starting evaluation..."
+echo "Starting evaluation with ${#files[@]} file(s)..."
 echo "=========================================="
 
 # 构建 Python 命令参数数组
@@ -177,45 +180,38 @@ if [ "$interaction" = "true" ]; then
     python_args+=("--interaction")
 fi
 
-# 执行命令
-echo "Executing command:"
-echo "python ${python_args[@]}"
-echo ""
+# # 打印命令（用于调试）
+# echo "Command:"
+# echo "python \\"
+# echo "  evaluation/eval_file.py \\"
+# echo "  --method $method \\"
+# echo "  --dataset $dataset \\"
+# echo "  --files \\"
+# for file in "${files[@]}"; do
+#     echo "    $file \\"
+# done | sed '$ s/ \\$//'
+# echo ""
 
+# 执行命令
 python "${python_args[@]}"
 
 # 检查执行结果
-if [ $? -eq 0 ]; then
+exit_code=$?
+if [ $exit_code -eq 0 ]; then
     echo ""
     echo "=========================================="
     echo "✓ Evaluation completed successfully!"
+    echo "  Processed ${#files[@]} file(s) from:"
+    echo "  $base_path"
     echo "=========================================="
 else
     echo ""
     echo "=========================================="
-    echo "✗ Evaluation failed with error code: $?"
+    echo "✗ Evaluation failed with error code: $exit_code"
     echo "=========================================="
-    exit 1
+    exit $exit_code
 fi
 
-# bash lxy_evaluate.sh --method anchor-thought --dataset gsm8k --folder inf_lighthinker_epl_r1distillqwen1.5b --ckpt 1310 --num_files 36
-# bash lxy_evaluate.sh --method anchor-thought --dataset mmlu --folder inf_lightthinker_r1distillqwen1.5b --ckpt 1305 --num_files 4
-# bash lxy_evaluate.sh --method anchor-thought --dataset mmlu --folder inf_lightthinker_r1distillqwen7b --ckpt 1305 --num_files 16
 
-# # 评估sglang推理的norml
-# method="normal"
-# dataset="mmlu" # gsm8k gpqa mmlu bbh
-# # folder="inf_baseline_r1distillqwen1.5b_fix"
-# folder="inf_baseline_r1distillqwen7b"
-# file="sglang_inference_results/${folder}/${dataset}_result.jsonl"
-# python evaluation/eval_file.py \
-#   --method $method \
-#   --tokenizer_path $tokenizer_path \
-#   --comp_config $comp_config \
-#   --model_type $model_type \
-#   --dataset $dataset \
-#   --files $file \
-#   --cache_size $cache_size \
-#   --bos_token $bos_token \
-#   --eos_token $eos_token 
-#   # --interaction 
+# bash lxy_evaluate.sh --method anchor-thought --dataset bbh --base_path /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/infer_data_case_study/inf_lightthinker_r1distillqwen1.5b/bbh/1305
+# bash lxy_evaluate.sh --method normal --dataset bbh --base_path /mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/sglang_inference_results/inf_baseline_r1distillqwen1.5b/bbh

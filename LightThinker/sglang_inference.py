@@ -9,12 +9,17 @@ from transformers import AutoTokenizer
 
 import sglang as sgl
 from dataset_reader import MMLUReader, BBHReader, GSM8KReader, GPQAReader
+from dataset_reader_cot import MMLUCOTReader, BBHCOTReader, GSM8KCOTReader, GPQACOTReader
 
 DATASET_MAPPING = {
     "mmlu": MMLUReader,
     "bbh": BBHReader,
     "gsm8k": GSM8KReader,
     "gpqa": GPQAReader,
+    "mmlu_cot": MMLUCOTReader,
+    "bbh_cot": BBHCOTReader,
+    "gsm8k_cot": GSM8KCOTReader,
+    "gpqa_cot": GPQACOTReader
 }
 
 def get_args():
@@ -129,7 +134,12 @@ async def main_async():  # 改为 async 函数
             print(f"      Inference finished. Total time: {total_time:.2f}s, Avg: {avg_time:.4f}s/sample")
 
             # 6. 保存结果
-            out_file = os.path.join(final_save_dir, f"{dataset_name}_result.jsonl")
+            # 这里不同评测集分文件夹保存，与lightthinker一致，方便统一评估
+            dataset_output_dir = os.path.join(final_save_dir, dataset_name)
+            os.makedirs(dataset_output_dir, exist_ok=True)
+        
+            out_file = os.path.join(dataset_output_dir, f"{dataset_name}_result.jsonl")
+            # out_file = os.path.join(final_save_dir, f"{dataset_name}_result.jsonl")
             print(f"      Processing results and saving to {out_file}...")
             
             with open(out_file, "w", encoding="utf-8") as f:

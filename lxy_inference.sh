@@ -3,11 +3,12 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)
 
 # `model_tag` is the filename under the output/ folder, 
 # corresponding to line 1461 of the code in LightThinker/inference.py.
-model_tag="lighthinker_7b_aug-wo-pc"
+# model_tag="lighthinker_7b_aug-wo-pc"
+model_tag="lighthinker-epl_1d5b_aug-wo-pc"
 
 # `model_short_tag` is used to save file, 
 # corresponding to line 1691 of the code in LightThinker/inference.py.
-model_short_tag="inf_lightthinker_r1distillqwen7b"
+model_short_tag="inf_lightthinker_epl_r1distillqwen1.5b"
 
 model_type="qwen"
 tokenizer_path="/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct"
@@ -15,9 +16,9 @@ bos_token="<|im_start|>"
 eos_token="<|im_end|>"
 compress_config="./configs/LightThinker/qwen/v1.json"
 
-ckpt=1305
+ckpt=1310
 # output_tag="inf_lightthinker_r1distillqwen1.5b"
-output_tag="inf_lightthinker_r1distillqwen7b"
+output_tag="inf_lightthinker_epl_r1distillqwen1.5b"
 # `model_path` is an optional argument
 # if you set the `model_path`, the arguments `ckpt` and `model_tag` will be ignored.
 # see line 1460 of the code in LightThinker/inference.py for more details.
@@ -97,106 +98,3 @@ do
     done
     ((logical_id++))
 done
-
-# split_size=4
-
-# index=1
-# CUDA_VISIBLE_DEVICES=0 nohup python "${root_dir}/inference.py" \
-#     --model_tag $model_tag \
-#     --model_short_tag $model_short_tag \
-#     --ckpt $ckpt \
-#     --tokenizer_path $tokenizer_path \
-#     --compress_config $compress_config \
-#     --max_new_tokens $max_new_tokens \
-#     --output_tag $output_tag \
-#     --model_type $model_type \
-#     --bos_token $bos_token \
-#     --eos_token $eos_token \
-#     --rolling_rope $rolling_rope \
-#     --diagonal $diagonal \
-#     --bi_directional $bi_directional \
-#     --see_current $see_current \
-#     --exclude_continue $exclude_continue \
-#     --output_compress_instruction $output_compress_instruction \
-#     --prefill_compress $prefill_compress \
-#     --compress_prompt $compress_prompt \
-#     --update_attention_method $update_attention_method \
-#     --split_size $split_size \
-#     --index $index > "ours_infer_log/${rolling_rope}_${compress_prompt}/${index}${prefix}_${model_short_tag}_${ckpt}.txt" 2>&1 &
-
-
-
-# index=2
-# CUDA_VISIBLE_DEVICES=1 nohup python "${root_dir}/inference.py" \
-#     --model_tag $model_tag \
-#     --model_short_tag $model_short_tag \
-#     --ckpt $ckpt \
-#     --tokenizer_path $tokenizer_path \
-#     --compress_config $compress_config \
-#     --max_new_tokens $max_new_tokens \
-#     --output_tag $output_tag \
-#     --model_type $model_type \
-#     --bos_token $bos_token \
-#     --eos_token $eos_token \
-#     --rolling_rope $rolling_rope \
-#     --diagonal $diagonal \
-#     --bi_directional $bi_directional \
-#     --see_current $see_current \
-#     --exclude_continue $exclude_continue \
-#     --output_compress_instruction $output_compress_instruction \
-#     --prefill_compress $prefill_compress \
-#     --compress_prompt $compress_prompt \
-#     --update_attention_method $update_attention_method \
-#     --split_size $split_size \
-#     --index $index > "ours_infer_log/${rolling_rope}_${compress_prompt}/${index}${prefix}_${model_short_tag}_${ckpt}.txt" 2>&1 &
-
-
-# index=3
-# CUDA_VISIBLE_DEVICES=2 nohup python "${root_dir}/inference.py" \
-#     --model_tag $model_tag \
-#     --model_short_tag $model_short_tag \
-#     --ckpt $ckpt \
-#     --tokenizer_path $tokenizer_path \
-#     --compress_config $compress_config \
-#     --max_new_tokens $max_new_tokens \
-#     --output_tag $output_tag \
-#     --model_type $model_type \
-#     --bos_token $bos_token \
-#     --eos_token $eos_token \
-#     --rolling_rope $rolling_rope \
-#     --diagonal $diagonal \
-#     --bi_directional $bi_directional \
-#     --see_current $see_current \
-#     --exclude_continue $exclude_continue \
-#     --output_compress_instruction $output_compress_instruction \
-#     --prefill_compress $prefill_compress \
-#     --compress_prompt $compress_prompt \
-#     --update_attention_method $update_attention_method \
-#     --split_size $split_size \
-#     --index $index > "ours_infer_log/${rolling_rope}_${compress_prompt}/${index}${prefix}_${model_short_tag}_${ckpt}.txt" 2>&1 &
-
-
-# index=4
-# CUDA_VISIBLE_DEVICES=3 nohup python "${root_dir}/inference.py" \
-#     --model_tag $model_tag \
-#     --model_short_tag $model_short_tag \
-#     --ckpt $ckpt \
-#     --tokenizer_path $tokenizer_path \
-#     --compress_config $compress_config \
-#     --max_new_tokens $max_new_tokens \
-#     --output_tag $output_tag \
-#     --model_type $model_type \
-#     --bos_token $bos_token \
-#     --eos_token $eos_token \
-#     --rolling_rope $rolling_rope \
-#     --diagonal $diagonal \
-#     --bi_directional $bi_directional \
-#     --see_current $see_current \
-#     --exclude_continue $exclude_continue \
-#     --output_compress_instruction $output_compress_instruction \
-#     --prefill_compress $prefill_compress \
-#     --compress_prompt $compress_prompt \
-#     --update_attention_method $update_attention_method \
-#     --split_size $split_size \
-#     --index $index > "ours_infer_log/${rolling_rope}_${compress_prompt}/${index}${prefix}_${model_short_tag}_${ckpt}.txt" 2>&1 &
-
