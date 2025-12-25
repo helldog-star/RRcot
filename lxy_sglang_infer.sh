@@ -9,11 +9,11 @@ model_path="/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRc
 datasets="mmlu gsm8k gpqa bbh"
 batch_size=16
 output_dir="./sglang_inference_results"
-extend_name="inf_baseline_r1distillqwen1.5b"
+extend_name="debug"
 
 root_dir="./LightThinker"
 
-python "${root_dir}/sglang_inference.py" \
+CUDA_VISIBLE_DEVICES=0,1,2,3 python "${root_dir}/sglang_inference.py" \
   --model_path $model_path \
   --datasets $datasets \
   --output_dir $output_dir \

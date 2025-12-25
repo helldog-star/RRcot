@@ -1,0 +1,336 @@
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:34:50 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:34:50 2025] expanding tokenizer ...
+[Wed Dec 24 22:34:50 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:11<00:33, 11.14s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:22<00:22, 11.06s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:32<00:10, 10.91s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:35<00:00,  7.58s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:35<00:00,  8.84s/it]
+[Wed Dec 24 22:35:27 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:35:27 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:35:27 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:35:27 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:35:43 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:35:43 2025] expanding tokenizer ...
+[Wed Dec 24 22:35:43 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.06it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.06it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.12it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:03<00:00,  1.52it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:03<00:00,  1.32it/s]
+[Wed Dec 24 22:35:47 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:35:47 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:35:47 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:35:47 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:36:02 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:36:02 2025] expanding tokenizer ...
+[Wed Dec 24 22:36:02 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.12it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.13it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.19it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.61it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.40it/s]
+[Wed Dec 24 22:36:06 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:36:06 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:36:06 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:36:06 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:36:21 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:36:21 2025] expanding tokenizer ...
+[Wed Dec 24 22:36:21 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.16it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.15it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.20it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.62it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.42it/s]
+[Wed Dec 24 22:36:25 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:36:25 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:36:25 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:36:25 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:36:39 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:36:40 2025] expanding tokenizer ...
+[Wed Dec 24 22:36:40 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.14it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.14it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.20it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.63it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.42it/s]
+[Wed Dec 24 22:36:43 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:36:43 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:36:43 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:36:43 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:36:58 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:36:58 2025] expanding tokenizer ...
+[Wed Dec 24 22:36:58 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.17it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.17it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.22it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.66it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.45it/s]
+[Wed Dec 24 22:37:02 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:37:02 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:37:02 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:37:02 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:37:17 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:37:17 2025] expanding tokenizer ...
+[Wed Dec 24 22:37:17 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.14it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.15it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.21it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.64it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.43it/s]
+[Wed Dec 24 22:37:21 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:37:21 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:37:21 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:37:21 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:37:35 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:37:36 2025] expanding tokenizer ...
+[Wed Dec 24 22:37:36 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.08it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.05it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.15it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.56it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.35it/s]
+[Wed Dec 24 22:37:39 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:37:39 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:37:39 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:37:39 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:37:54 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:37:55 2025] expanding tokenizer ...
+[Wed Dec 24 22:37:55 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.13it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.11it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.14it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.57it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.37it/s]
+[Wed Dec 24 22:37:58 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:37:58 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:37:58 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:37:58 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:38:13 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:38:13 2025] expanding tokenizer ...
+[Wed Dec 24 22:38:13 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.14it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.14it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.20it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.62it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.42it/s]
+[Wed Dec 24 22:38:17 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:38:17 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:38:17 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:38:17 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:38:32 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:38:32 2025] expanding tokenizer ...
+[Wed Dec 24 22:38:32 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.13it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.13it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.18it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.60it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.40it/s]
+[Wed Dec 24 22:38:36 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:38:36 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:38:36 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:38:36 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:38:51 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:38:51 2025] expanding tokenizer ...
+[Wed Dec 24 22:38:51 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.12it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.13it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.17it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.59it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.39it/s]
+[Wed Dec 24 22:38:55 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:38:55 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:38:55 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:38:55 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:39:09 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:39:10 2025] expanding tokenizer ...
+[Wed Dec 24 22:39:10 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.15it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.15it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.21it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.63it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.43it/s]
+[Wed Dec 24 22:39:13 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:39:13 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:39:13 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:39:13 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:39:28 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:39:28 2025] expanding tokenizer ...
+[Wed Dec 24 22:39:28 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.15it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.15it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.20it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.62it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.42it/s]
+[Wed Dec 24 22:39:32 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:39:32 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:39:32 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:39:32 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:39:47 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:39:48 2025] expanding tokenizer ...
+[Wed Dec 24 22:39:48 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:00<00:02,  1.14it/s]Loading checkpoint shards:  50%|█████     | 2/4 [00:01<00:01,  1.15it/s]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:02<00:00,  1.20it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.63it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:02<00:00,  1.43it/s]
+[Wed Dec 24 22:39:51 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:39:51 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:39:51 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:39:51 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
+Namespace(model_tag='lighthinker_7b_aug-wo-pc', model_short_tag='inf_lightthinker_r1distillqwen7b', ckpt=1305, tokenizer_path='/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/models/Qwen2.5-1.5B-Instruct', compress_config='./configs/LightThinker/qwen/v1.json', max_new_tokens=10240, output_tag='inf_lightthinker_r1distillqwen7b', model_type='qwen', model_path=None, bos_token='<|im_start|>', eos_token='<|im_end|>', rolling_rope=False, diagonal=False, bi_directional=False, see_current=False, exclude_continue=False, output_compress_instruction='None', prefill_compress=False, compress_prompt=False, update_attention_method='local', split_size=16, index=None, use_EPL=False)
+loading config from `./configs/LightThinker/qwen/v1.json`
+[Wed Dec 24 22:40:08 2025] reading json file from `./configs/LightThinker/qwen/v1.json` ...
+load model from `output/lighthinker_7b_aug-wo-pc/checkpoint-1305` ...
+[Wed Dec 24 22:40:08 2025] expanding tokenizer ...
+[Wed Dec 24 22:40:08 2025] 17 tokens have been added including ['<|splitter|>', '<|continue|>', '<|recover|>', '<|begin_of_thought|>', '<|end_of_thought|>', '<|begin_of_solution|>', '<|end_of_solution|>', '\n\n', '<|o_0|>', '<|o_1|>', '<|o_2|>', '<|o_3|>', '<|o_4|>', '<|o_5|>', '<|o_6|>', '<|o_7|>', '<|o_8|>']
+Loading checkpoint shards:   0%|          | 0/4 [00:00<?, ?it/s]Loading checkpoint shards:  25%|██▌       | 1/4 [00:01<00:03,  1.19s/it]Loading checkpoint shards:  50%|█████     | 2/4 [00:02<00:02,  1.18s/it]Loading checkpoint shards:  75%|███████▌  | 3/4 [00:03<00:01,  1.13s/it]Loading checkpoint shards: 100%|██████████| 4/4 [00:03<00:00,  1.21it/s]Loading checkpoint shards: 100%|██████████| 4/4 [00:03<00:00,  1.05it/s]
+[Wed Dec 24 22:40:13 2025] reading json file from `data/eval/mmlu.json` ...
+[Wed Dec 24 22:40:13 2025] reading json file from `data/eval/gsm8k.json` ...
+[Wed Dec 24 22:40:13 2025] reading json file from `data/eval/gpqa.json` ...
+[Wed Dec 24 22:40:13 2025] reading json file from `data/eval/bbh.json` ...
+Traceback (most recent call last):
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1746, in <module>
+    main()
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1718, in main
+    eval_dataset(
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/liuxinyu67/miniconda/envs/lightthinker/lib/python3.9/site-packages/torch/utils/_contextlib.py", line 116, in decorate_context
+    return func(*args, **kwargs)
+  File "/mnt/dolphinfs/hdd_pool/docker/user/hadoop-aipnlp/FMG/liuxinyu67/RRcot/./LightThinker/inference.py", line 1561, in eval_dataset
+    assert False
+AssertionError
