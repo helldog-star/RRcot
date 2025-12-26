@@ -686,7 +686,8 @@ class TokenUtils:
         compression_ratio = max(compression_ratio - (1 if compression_ratio % 2 == 0 else 0), 1)
         compressed_positions = torch.arange((text_start + (compression_ratio - 1) // 2), text_end, step=compression_ratio, device=device)[:compression_count].unsqueeze(0)
         prefix_position_ids = position_ids[:, :1]
-        suffix_position_ids = position_ids[:, compressed_positions.size(1)+1:] 
+        # suffix_position_ids = position_ids[:, compressed_positions.size(1)+1:] 
+        suffix_position_ids = torch.tensor([[text_end]], device=device)
         position_ids_for_epl = torch.cat([prefix_position_ids, compressed_positions, suffix_position_ids], dim=1)
         return position_ids_for_epl
 
@@ -1224,7 +1225,9 @@ def _sentence_level_generate(
     global_start:int = len(token_utils._whole_input_ids) # 整个输入完整的序列，包括cot+压缩token？
     local_start:int = len(token_utils._current_input_ids) # 应该是当前输入的序列，意味着去掉了cot，但是有压缩token
 
-    compression_count = 0
+    current_compression_and_continue_count = 0
+    use_compression_all_count = 0
+    debug_count = 0
     assert local_start == kv_utils.get_cache()._seen_tokens, \
         f"{local_start} == {kv_utils.get_cache()._seen_tokens}"
     while predicted_token_id != eos_token_id and new_token_counters < max_new_tokens:
@@ -1242,7 +1245,7 @@ def _sentence_level_generate(
                 comp_config.continue_token_id
             )
             new_length = len(new_input_ids)
-            compression_count = (len(comp_config.get_output_comp_token_id()) + 1)
+            current_compression_and_continue_count += (len(comp_config.get_output_comp_token_id()) + 1)
             if update_attention_method == 'global':
                 origin_length = len(token_utils._whole_input_ids)
                 indicator = [
@@ -1297,15 +1300,25 @@ def _sentence_level_generate(
 
         # ......The code is beautifully repeated......
         input_ids, position_ids = token_utils.set_input_ids(new_input_ids, return_tensors=True)
+        #     position_ids = position_ids - len(comp_config.get_output_comp_token_id())
+        position_ids = position_ids - use_compression_all_count
+        # print("Before EPL:", position_ids)
+
         if use_EPL and IS_COMP_MODE:
-            origin_length = len(token_utils._whole_input_ids) - compression_count
+            # 这里减去current_compression_and_continue_count的目的是为了得到当前cot的位置，所以需要减去current_compression_and_continue_count(10)
+            ten_or_nine = current_compression_and_continue_count // 10
+            origin_length = len(token_utils._whole_input_ids) - current_compression_and_continue_count + (0 if ten_or_nine//10==1 else ten_or_nine)-1
+            global_start = global_start - use_compression_all_count
             indicator = [
                     global_start, # 当前开始位置
-                    origin_length + 1, # 当前结束位置，下一个位置应该是压缩token
-                    (origin_length + 1 - global_start) // len(comp_config.get_output_comp_token_id()), # 当前压缩率
+                    origin_length, # 当前结束位置，下一个位置应该是压缩token
+                    (origin_length - global_start) // len(comp_config.get_output_comp_token_id()), # 当前压缩率
                     len(comp_config.get_output_comp_token_id()) # 压缩token数量
                 ]
             position_ids = token_utils.use_epl_for_compression(position_ids, indicator)
+            # print("After EPL:", position_ids)
+            use_compression_all_count += len(comp_config.get_output_comp_token_id())
+        # print("After EPL:", position_ids)
         if DEBUG:
             if update_attention_method == 'global':
                 DebugUtils.show_global_attention(
@@ -1358,7 +1371,7 @@ def _sentence_level_generate(
         predicted_token_id:int = InferenceUtils.get_predicted_token_ids(
             model_output=model_output, idx=-1
         )
-        # debug_count += 1
+        debug_count += 1
         # if debug_count%70==0:
         #     predicted_token_id = torch.tensor(151665)
         new_token_counters += 1
