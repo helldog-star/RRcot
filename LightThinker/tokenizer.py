@@ -224,11 +224,15 @@ class Tokenizer:
                             n_abandoned = len(tokenized_input_id_list[i][j])
                             n_compressed = n_comp
                             # 压缩率为偶数时强制+1改成奇数
-                            compression_ratio = max(n_abandoned // n_compressed - (1 if (n_abandoned // n_compressed) % 2 == 0 else 0), 1)
+                            compression_ratio = round(n_abandoned / n_compressed)
+                            compression_ratio = max(compression_ratio - (1 if compression_ratio % 2 == 0 else 0), 1)
                             # 均匀映射到 abandoned 段: 从len(position_ids) 到 len(position_ids) + n_abandoned -1 之间
                             # 这里减去压缩Token的使用总数量(因为压缩的是cot)，第一次压缩时不需要考虑
                             start_pos = len(final_item['input_ids']) + (compression_ratio - 1) // 2 - compression_count
                             end_pos = len(final_item['input_ids']) + n_abandoned - compression_count
+                            # 边界条件解决
+                            if start_pos >= end_pos:
+                                start_pos = len(final_item['input_ids'])
                             compressed_positions = list(range(start_pos, end_pos, compression_ratio))[:n_compressed]
                         else:
                             compressed_positions = None
