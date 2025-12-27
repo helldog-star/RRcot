@@ -684,7 +684,11 @@ class TokenUtils:
         device = position_ids.device
         text_start, text_end, compression_ratio, compression_count = indicator
         compression_ratio = max(compression_ratio - (1 if compression_ratio % 2 == 0 else 0), 1)
-        compressed_positions = torch.arange((text_start + (compression_ratio - 1) // 2), text_end, step=compression_ratio, device=device)[:compression_count].unsqueeze(0)
+        start = text_start + (compression_ratio - 1) // 2
+        end = text_end
+        if start >= end:  # 因为有时候会存在513 > 512的情况 -> 实际长度512 所以start应该从511开始
+            start = text_start
+        compressed_positions = torch.arange(start, end, step=compression_ratio, device=device)[:compression_count].unsqueeze(0)
         if compression_ratio == 1:
             compressed_positions = (torch.arange( text_start, text_start + compression_count, device=device).unsqueeze(0))
         prefix_position_ids = position_ids[:, :1]
