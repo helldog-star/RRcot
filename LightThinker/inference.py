@@ -689,6 +689,8 @@ class TokenUtils:
         # suffix_position_ids = position_ids[:, compressed_positions.size(1)+1:] 
         suffix_position_ids = torch.tensor([[text_end]], device=device)
         position_ids_for_epl = torch.cat([prefix_position_ids, compressed_positions, suffix_position_ids], dim=1)
+        if compression_ratio == 1:
+            position_ids_for_epl = position_ids
         return position_ids_for_epl
 
 # ========== CORE CODE ==========
@@ -1372,8 +1374,10 @@ def _sentence_level_generate(
             model_output=model_output, idx=-1
         )
         debug_count += 1
-        # if debug_count%70==0:
-        #     predicted_token_id = torch.tensor(151665)
+        if debug_count%7==0:
+            predicted_token_id = torch.tensor(151665)
+        if debug_count%70==0:
+            predicted_token_id = eos_token_id
         new_token_counters += 1
 
     token_utils.show_output_input_ids.append(predicted_token_id)
@@ -1722,9 +1726,9 @@ def main():
 
     task_list = [
         (MMLUReader(), "mmlu"),
-        (GSM8KReader(), "gsm8k"),
-        (GPQAReader(), "gpqa"),
-        (BBHReader(), "bbh"),
+        # (GSM8KReader(), "gsm8k"),
+        # (GPQAReader(), "gpqa"),
+        # (BBHReader(), "bbh"),
     ]
 
     for reader, name in task_list:
