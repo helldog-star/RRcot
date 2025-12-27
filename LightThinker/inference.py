@@ -1319,7 +1319,7 @@ def _sentence_level_generate(
             indicator = [
                     cot_start, # 当前cot开始位置
                     cot_end, # 当前结束位置，下一个位置应该是压缩token
-                    (cot_end - cot_start) // len(comp_config.get_output_comp_token_id()), # 当前压缩率
+                    round((cot_end - cot_start) / len(comp_config.get_output_comp_token_id())), # 当前压缩率
                     len(comp_config.get_output_comp_token_id()) # 压缩token数量
                 ]
             # 更新cot位置
