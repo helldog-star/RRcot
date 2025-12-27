@@ -685,6 +685,8 @@ class TokenUtils:
         text_start, text_end, compression_ratio, compression_count = indicator
         compression_ratio = max(compression_ratio - (1 if compression_ratio % 2 == 0 else 0), 1)
         compressed_positions = torch.arange((text_start + (compression_ratio - 1) // 2), text_end, step=compression_ratio, device=device)[:compression_count].unsqueeze(0)
+        if compression_ratio == 1:
+            compressed_positions = (torch.arange( text_start, text_start + compression_count, device=device).unsqueeze(0))
         prefix_position_ids = position_ids[:, :1]
         # suffix_position_ids = position_ids[:, compressed_positions.size(1)+1:] 
         suffix_position_ids = torch.tensor([[text_end]], device=device)
@@ -1374,6 +1376,8 @@ def _sentence_level_generate(
         debug_count += 1
         # if debug_count%70==0:
         #     predicted_token_id = torch.tensor(151665)
+        # if debug_count%700==0:
+        #     predicted_token_id = eos_token_id
         new_token_counters += 1
 
     token_utils.show_output_input_ids.append(predicted_token_id)
