@@ -1,0 +1,9 @@
+{
+    "mtp_depth": 3, 
+    "mtp_lambda": 0.01,
+    "mtp_hidden_size": null,
+    "Expectation": true,
+    "mtp_module_work_layer": -1,
+    "mtp_mode": "cross-attention",
+    "stop_cot_gradient": false
+}
