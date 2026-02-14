@@ -1390,10 +1390,10 @@ class Qwen2ForCausalLM(Qwen2PreTrainedModel, GenerationMixin):
         self.mtp_depth = getattr(config, "mtp_depth", 0)
         self.Expectation = getattr(config, "Expectation", False)
         self.mtp_module_work_layer = getattr(config, "mtp_module_work_layer", -1)
-        self.mtp_mode = "cross-attention"
+        self.mtp_mode = getattr(config, "mtp_mode", "normal")
         self.mtp_lambda = getattr(config, "mtp_lambda", 1.0)
         self.stop_cot_gradient = getattr(config, "stop_cot_gradient", False)
-        self.forzen_model_train_mtp = False
+        self.forzen_model_train_mtp = getattr(config, "forzen_model_train_mtp", False)
         # if self.stop_cot_gradient:
         #     assert self.mtp_mode in ["normal", "cross-attention", "cross-attention-full"],"stop_cot_gradient only works in cross-attention mode"
 

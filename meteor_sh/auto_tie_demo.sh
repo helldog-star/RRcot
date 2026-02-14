@@ -11,7 +11,7 @@ OUTPUT_BASE_DIR="/mnt/zhaorunsong/lx/rrcot_test"  # 所有输出（训练、推�
 
 # 模型和Tokenizer路径配置
 TOKENIZER_PATH="/mnt/zhaorunsong/models/Qwen2.5-0.5B"  # Tokenizer路径
-MODEL_PATH="/mnt/zhaorunsong/lx/rrcot_test/epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2/train/checkpoint-185"  # 预训练模型路径
+MODEL_PATH="/mnt/zhaorunsong/models/Qwen2.5-0.5B"  # 预训练模型路径
 
 # 训练数据路径配置
 TRAIN_DATA_PATH="/mnt/zhaorunsong/lx/RRcot/data/train_test.jsonl"  # 训练数据路径
@@ -132,9 +132,15 @@ inference_and_evaluate() {
 #     exit 1
 # fi
 
-train_model "epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2" "True" "2e-5" "aug-wo-pc" "configs/epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2.json" "adaptive_v1"
+# train_model "epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2" "True" "2e-5" "aug-wo-pc" "configs/epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2.json" "adaptive_v1"
+# if [ $? -ne 0 ]; then
+#     echo "❌ epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2训练失败，退出"
+#     exit 1
+# fi
+
+train_model "epl_adaptive_lm_deatch_mtp_cross_attn_E_w1" "True" "2e-5" "aug-wo-pc" "configs/epl_adaptive_lm_deatch_mtp_cross_attn_E_w1.json" "adaptive_v1"
 if [ $? -ne 0 ]; then
-    echo "❌ epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2训练失败，退出"
+    echo "❌ epl_adaptive_lm_deatch_mtp_cross_attn_E_w1训练失败，退出"
     exit 1
 fi
 # inference_and_evaluate "distill-r1-7b" "normal" "sglang_inference"
