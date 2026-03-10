@@ -1304,17 +1304,11 @@ class Qwen2ForCausalLM(Qwen2PreTrainedModel, GenerationMixin):
                 safe_lm_labels = shift_lm_labels[valid_shift_mask]
 
                 zero_loss = logits.sum() * 0.0
-                ce_loss = CrossEntropyLoss(ignore_index=-100)
-                mtp_loss = (
-                    ce_loss(mtp_logits.float(), mtp_labels.to(mtp_logits.device))
-                    if mtp_labels.numel() > 0
-                    else zero_loss
-                )
-                lm_loss = (
-                    ce_loss(safe_lm_logits.float(), safe_lm_labels.to(safe_lm_logits.device))
-                    if safe_lm_labels.numel() > 0
-                    else zero_loss
-                )
+                lm_loss = (self.loss_function(safe_lm_logits.float(),safe_lm_labels.to(safe_lm_logits.device),self.vocab_size,shift_labels=safe_lm_labels,**loss_kwargs,)
+                    if safe_lm_labels.numel() > 0 and safe_lm_labels.ne(-100).any()else zero_loss)
+                
+                mtp_loss = (self.loss_function( mtp_logits.float(),mtp_labels.to(mtp_logits.device),self.vocab_size,shift_labels=mtp_labels,**loss_kwargs,)
+                    if mtp_labels.numel() > 0 and mtp_labels.ne(-100).any()else zero_loss)
 
                 self._last_mtp_loss = mtp_loss.detach().item()
                 self._last_lm_loss = lm_loss.detach().item()
