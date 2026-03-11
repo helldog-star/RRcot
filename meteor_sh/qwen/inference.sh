@@ -27,7 +27,7 @@ tokenizer_path="$6"
 compress_config="$7"
 
 # 根据model_tag自动调整use_EPL：vanilla和lightthinker为false，其余为true
-if [ "$model_tag" = "vanilla" ] || [ "$model_tag" = "lightthinker" ]; then
+if [ "$model_tag" = "vanilla" ] || [ "$model_tag" = "lightthinker" ] || [ "$model_tag" = "distill-r1-7b" ]; then
     use_EPL="false"
 else
     use_EPL="true"
@@ -61,7 +61,7 @@ export PYTHONPATH=$PYTHONPATH:$(pwd)
 model_short_tag="${model_tag}"
 
 model_type="qwen"
-# tokenizer_path 从命令行参数传入
+# tokenizer_path, model_path, train_data_path 从命令行参数传入
 bos_token="<|im_start|>"
 eos_token="<|im_end|>"
 # compress_config="./configs/LightThinker/qwen/v1.json"
@@ -69,7 +69,7 @@ eos_token="<|im_end|>"
 # `model_path` is an optional argument
 # if you set the `model_path`, the arguments `ckpt` and `model_tag` will be ignored.
 # see line 1460 of the code in LightThinker/inference.py for more details.
-max_new_tokens=20
+max_new_tokens=1024
 
 prefix=""
 diagonal="false"
@@ -106,8 +106,8 @@ echo "model_path: ${model_path}"
 echo "Inference model: ${model_tag}..."
 
 #用于设置总共几张卡和开多少进程
-target_gpus=( 0 1 2 3)
-process_per_gpu=4
+target_gpus=( 0 5 6 7)
+process_per_gpu=2
 gpu_count=${#target_gpus[@]}
 # 自动计算总切片数 (假如用了2张卡，每张3进程，split_size就是6)
 split_size=$((gpu_count * process_per_gpu))

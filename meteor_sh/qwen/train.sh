@@ -91,9 +91,10 @@ eos_token="<|im_end|>"
 # conf_version="v1"
 
 # training
-max_length=4096
+# max_length=4096
+max_length=1024 # for apa mtp
 lr_scheduler_type="cosine"
-epochs=5   #change to 1 for test
+epochs=3   #change to 1 for test
 # lr 从命令行参数传入，不再硬编码
 save_steps=2
 deepspeed="$root_dir/configs/ds_z3_offload_config.json"
@@ -161,7 +162,7 @@ echo "warmup_steps=${warmup_steps}"
 compress_config="$root_dir/configs/LightThinker/${model_type}/${conf_version}.json"
 
 # 使用 tee 命令同时输出到终端和日志文件
-deepspeed --include localhost:0,1,2,3 --master_port 29503 LightThinker/train.py \
+deepspeed --include localhost:0,5,6,7 LightThinker/train.py \
     --model_type $model_type \
     --model_path $model_path \
     --tokenizer_path $tokenizer_path \

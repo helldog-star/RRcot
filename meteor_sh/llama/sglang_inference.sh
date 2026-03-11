@@ -42,7 +42,7 @@ fi
 
 # 根据传入的超参数自动组合路径
 output_path="${output_base_dir}/${model_tag}"
-model_path="/mnt/jinbo/RLRM/model/deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+model_path="${output_path}/train/checkpoint-${ckpt}"
 
 # 检查模型路径是否存在
 if [ ! -d "$model_path" ]; then

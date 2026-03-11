@@ -10,8 +10,8 @@ INFERENCE_ROOT_DIR="${ROOT_DIR}/LightThinker"  # 推理脚本使用的代码根�
 OUTPUT_BASE_DIR="/mnt/zhaorunsong/lx/rrcot_test"  # 所有输出（训练、推理）的基础目录
 
 # 模型和Tokenizer路径配置
-TOKENIZER_PATH="/mnt/zhaorunsong/models/Qwen2.5-0.5B"  # Tokenizer路径
-MODEL_PATH="/mnt/zhaorunsong/models/Qwen2.5-0.5B"  # 预训练模型路径
+TOKENIZER_PATH="/mnt/zhaorunsong/models/meta-llama/Llama-3.2-1B-Instruct"  # Tokenizer路径
+MODEL_PATH="/mnt/zhaorunsong/models/meta-llama/Llama-3.2-1B-Instruct"  # 预训练模型路径
 
 # 训练数据路径配置
 TRAIN_DATA_PATH="/mnt/zhaorunsong/lx/RRcot/data/train_test.jsonl"  # 训练数据路径
@@ -24,7 +24,7 @@ CONDA_ENV_NAME="sglang"  # Conda环境名称
 # ==================== 推理和评估配置 ====================
 # 设置推理和评估的默认参数
 REPETITION_PENALTY="1.1"  # 重复惩罚系数
-CKPT="40"  # 检查点编号，可以根据实际情况修改
+CKPT="39"  # 检查点编号，可以根据实际情况修改
 DATASETS=("bbh" "gpqa" "gsm8k" "mmlu")  # 要评估的数据集
 
 # 获取脚本所在目录
@@ -47,9 +47,10 @@ train_model() {
     local mode=$4
     local aux_config=$5
     local conf_version=$6
+    local max_length=$7
     
     echo "=======🚀 ${model_tag}开始训练 ======="
-    bash ${TRAIN_SCRIPT} "${ROOT_DIR}" "${model_tag}" "${use_EPL}" "${lr}" "${mode}" "${aux_config}" "${OUTPUT_BASE_DIR}" "${TOKENIZER_PATH}" "${MODEL_PATH}" "${TRAIN_DATA_PATH}" "${conf_version}"
+    bash ${TRAIN_SCRIPT} "${ROOT_DIR}" "${model_tag}" "${use_EPL}" "${lr}" "${mode}" "${aux_config}" "${OUTPUT_BASE_DIR}" "${TOKENIZER_PATH}" "${MODEL_PATH}" "${TRAIN_DATA_PATH}" "${conf_version}" "${max_length}"
     if [ $? -ne 0 ]; then
         echo "❌ ${model_tag}训练失败"
         return 1
@@ -125,33 +126,25 @@ inference_and_evaluate() {
     return 0
 }
 
-# ==================== 模型1: epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2 ====================
-# train_model "epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2" "False" "1e-5" "normal" "configs/epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2.json" "adaptive_v1"
+
+
+# ==================== 模型: epl_apa_mtp_w3e-1 ====================
+# train_model "epl_apa_mtp_w3e-1" "True" "2e-5" "aug-wo-pc-apa-mtp" "configs/epl_apa_mtp.json" "apa_mtp"
 # if [ $? -ne 0 ]; then
-#     echo "❌ epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2训练失败，退出"
+#     echo "❌ epl_apa_mtp_w3e-1训练失败，退出"
 #     exit 1
 # fi
+# inference_and_evaluate "epl_apa_mtp_w3e-1" "anchor-thought" "inference" "./configs/LightThinker/llama/apa_mtp.json"
 
-# train_model "epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2" "True" "2e-5" "aug-wo-pc" "configs/epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2.json" "adaptive_v1"
-# if [ $? -ne 0 ]; then
-#     echo "❌ epl_adaptive_forzen_mtp_aux_cross_attn_E_w1e-2训练失败，退出"
-#     exit 1
-# fi
 
-train_model "epl_adaptive_lm_deatch_mtp_cross_attn_E_w1" "True" "2e-5" "aug-wo-pc" "configs/epl_adaptive_lm_deatch_mtp_cross_attn_E_w1.json" "adaptive_v1"
+train_model "llama_epl" "True" "2e-5" "aug-wo-pc" "None" "v1" "1024"
 if [ $? -ne 0 ]; then
-    echo "❌ epl_adaptive_lm_deatch_mtp_cross_attn_E_w1训练失败，退出"
+    echo "❌ llama_epl训练失败，退出"
     exit 1
 fi
-# inference_and_evaluate "distill-r1-7b" "normal" "sglang_inference"
-# 1. 改了训练数据，记得把distill -> train
-# 2. 训练数据脚本 Fasle->True   1e-5 -> 2e-5   normal -> aug-wo-pc
-# 2. 记得在mtp_config中把"mtp_mode": "normal" -> "cross-attention"
-# 3. 记得把adaptive_v1.json的"forzen_model_train_mtp": true -> false
-# config中发forzen_model_train_mtp   |   model_qwen中的 self.mtp_mode = "cross-attention"
-# 4. model_path=新的ckpt | resume_from_checkpoint=None
-# 5. 取消train中的注释代码
-# echo ""
-# echo "=========================================="
-# echo "      ✅ 所有模型训练、推理和评估完成     "
-# echo "=========================================="
+
+
+echo ""
+echo "=========================================="
+echo "      ✅ 所有模型训练、推理和评估完成     "
+echo "=========================================="
