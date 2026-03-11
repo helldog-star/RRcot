@@ -104,8 +104,7 @@ def capture_loss_hook(module, input, output):
 class MTPLossCallback(TrainerCallback):
     def __init__(self, buffer_instance):
         self.buffer = buffer_instance
-        self.local_stats = {"lm": 0.0, "mtp": 0.0}
-        self.step_count = 0
+        self.local_stats = {"lm_sum": 0.0, "mtp_sum": 0.0, "micro_count": 0}
 
     def on_step_end(self, args, state, control, **kwargs):
         # 从外部 buffer 读取数据
@@ -114,46 +113,57 @@ class MTPLossCallback(TrainerCallback):
         if not history:
             return
 
-        # 计算当前 Step 的 Sum Loss
+        # 统计当前 optimizer step 内所有 micro-batch 的损失总和与数量
         local_step_lm_sum = sum(item["lm"].item() for item in history)
         local_step_mtp_sum = sum(item["mtp"].item() for item in history)
+        micro_count = len(history)
         
-        self.local_stats["lm"] += local_step_lm_sum
-        self.local_stats["mtp"] += local_step_mtp_sum
-        self.step_count += 1
+        self.local_stats["lm_sum"] += local_step_lm_sum
+        self.local_stats["mtp_sum"] += local_step_mtp_sum
+        self.local_stats["micro_count"] += micro_count
         
         # 【关键】清空 Buffer，防止内存溢出和数据混淆
         self.buffer.clear()
 
     def on_log(self, args, state, control, logs=None, **kwargs):
-        if logs is not None and self.step_count > 0:
-            # 计算本地平均值
-            local_avg_lm = self.local_stats["lm"] / self.step_count
-            local_avg_mtp = self.local_stats["mtp"] / self.step_count
+        if logs is not None and self.local_stats["micro_count"] > 0:
+            local_lm_sum = self.local_stats["lm_sum"]
+            local_mtp_sum = self.local_stats["mtp_sum"]
+            local_micro_count = float(self.local_stats["micro_count"])
             
             # === DeepSpeed 多卡同步核心逻辑 ===
             if dist.is_initialized():
-                # 放在 Tensor 中以便在 GPU 间传输
-                metrics = torch.tensor([local_avg_lm, local_avg_mtp], device=args.device)
+                # 同步 sum 与 count，做全局加权平均，避免卡间样本数不一致带来的偏差
+                metrics = torch.tensor(
+                    [local_lm_sum, local_mtp_sum, local_micro_count],
+                    dtype=torch.float64,
+                    device=args.device,
+                )
                 
                 # 所有显卡的数据相加 (ReduceOp.SUM)
                 dist.all_reduce(metrics, op=dist.ReduceOp.SUM)
                 
-                # 除以显卡数量，得到全局平均
-                world_size = dist.get_world_size()
-                global_avg_lm = (metrics[0] / world_size).item()
-                global_avg_mtp = (metrics[1] / world_size).item()
+                global_micro_count = max(metrics[2].item(), 1.0)
+                global_avg_lm = (metrics[0] / global_micro_count).item()
+                global_avg_mtp = (metrics[1] / global_micro_count).item()
             else:
-                global_avg_lm = local_avg_lm
-                global_avg_mtp = local_avg_mtp
+                global_avg_lm = local_lm_sum / max(local_micro_count, 1.0)
+                global_avg_mtp = local_mtp_sum / max(local_micro_count, 1.0)
+
+            model = kwargs.get("model", None)
+            if model is not None and hasattr(model, "module"):
+                model = model.module
+            mtp_lambda = float(getattr(model, "mtp_lambda", 1.0)) if model is not None else 1.0
+            global_avg_total = global_avg_lm + mtp_lambda * global_avg_mtp
 
             # 写入 Log (Trainer 会自动发送给 TensorBoard)
+            # 覆盖 Trainer 默认 loss，使终端显示口径与 lm_loss/mtp_loss 一致
+            logs['loss'] = round(global_avg_total, 4)
             logs['lm_loss'] = round(global_avg_lm, 4)
             logs['mtp_loss'] = round(global_avg_mtp, 4)
             
             # 重置计数器
-            self.local_stats = {"lm": 0.0, "mtp": 0.0}
-            self.step_count = 0
+            self.local_stats = {"lm_sum": 0.0, "mtp_sum": 0.0, "micro_count": 0}
 
 
 def init_mtp_from_last_layer(model) -> None:
