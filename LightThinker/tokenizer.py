@@ -517,6 +517,7 @@ class Tokenizer:
                                 pos = base_pos + center_offset
                                 compressed_positions.append(pos)
                         else:
+                            n_abandoned = len(tokenized_input_id_list[i][j]) // 2
                             compressed_positions = None
                 
                 if use_EPL and structured_input_indicator[i][j] == 'compressed-output':

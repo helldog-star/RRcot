@@ -162,7 +162,7 @@ echo "warmup_steps=${warmup_steps}"
 compress_config="$root_dir/configs/LightThinker/${model_type}/${conf_version}.json"
 
 # 使用 tee 命令同时输出到终端和日志文件
-deepspeed --include localhost:4,5,6,7 --master_port=29501 LightThinker/train.py \
+deepspeed --include localhost:0,1,2,3 --master_port=29501 LightThinker/train.py \
     --model_type $model_type \
     --model_path $model_path \
     --tokenizer_path $tokenizer_path \

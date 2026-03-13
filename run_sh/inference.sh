@@ -28,7 +28,7 @@ compress_config="$7"
 aux_config="$8"
 
 # 根据model_tag自动调整use_EPL：vanilla和lightthinker为false，其余为true
-if [ "$model_tag" = "vanilla" ] || [ "$model_tag" = "lightthinker" ] || [ "$model_tag" = "distill-r1-7b" ] || [ "$model_tag" = "apa_mtp_w3e-1_wo-epl_0311" ]; then
+if [ "$model_tag" = "vanilla" ] || [ "$model_tag" = "lightthinker" ] || [ "$model_tag" = "distill-r1-7b" ] || [ "$model_tag" = "apa_mtp_w3e-1_wo-epl" ]; then
     use_EPL="false"
 else
     use_EPL="true"
