@@ -25,6 +25,7 @@ root_dir="$4"
 output_base_dir="$5"
 tokenizer_path="$6"
 compress_config="$7"
+aux_config="$8"
 
 # 根据model_tag自动调整use_EPL：vanilla和lightthinker为false，其余为true
 if [ "$model_tag" = "vanilla" ] || [ "$model_tag" = "lightthinker" ] || [ "$model_tag" = "distill-r1-7b" ]; then
@@ -106,7 +107,7 @@ echo "model_path: ${model_path}"
 echo "Inference model: ${model_tag}..."
 
 #用于设置总共几张卡和开多少进程
-target_gpus=( 0 5 6 7)
+target_gpus=( 4 5 6 7)
 process_per_gpu=2
 gpu_count=${#target_gpus[@]}
 # 自动计算总切片数 (假如用了2张卡，每张3进程，split_size就是6)
@@ -150,6 +151,7 @@ do
             --split_size $split_size \
             --use_EPL $use_EPL \
             --model_path $model_path \
+            --aux_config $aux_config \
             --index $real_index > "${output_tag}/inference_log/${rolling_rope}_${compress_prompt}/${real_index}${prefix}_${model_short_tag}_${ckpt}.txt" 2>&1 &
         
         sleep 5
