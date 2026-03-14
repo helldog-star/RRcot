@@ -2597,7 +2597,7 @@ def main():
     model, tokenizer = get_model_and_tokenizer(
         args, comp_config
     )
-    if args.aux_config is not None:
+    if args.aux_config not in [None, "None"]:
         with open(args.aux_config, "r", encoding='utf-8') as f:
             aux_config = json.load(f)
     else:
