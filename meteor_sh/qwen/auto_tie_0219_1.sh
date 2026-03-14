@@ -71,21 +71,21 @@ inference_and_evaluate() {
     echo "      🚀 ${model_tag} 开始推理     "
     echo "=========================================="
     
-    # 根据模型类型选择推理脚本
-    if [ "$inference_script_type" = "sglang_inference" ]; then
-        INFERENCE_CMD="${SGLANG_INFERENCE_SCRIPT}"
-        echo "使用 sglang_inference.sh 进行推理"
-        bash ${INFERENCE_CMD} "${model_tag}" "${REPETITION_PENALTY}" "${CKPT}" "${INFERENCE_ROOT_DIR}" "${OUTPUT_BASE_DIR}" "${CONDA_SH_PATH}" "${CONDA_ENV_NAME}"
-    else
-        INFERENCE_CMD="${INFERENCE_SCRIPT}"
-        echo "使用 inference.sh 进行推理"
-        bash ${INFERENCE_CMD} "${model_tag}" "${REPETITION_PENALTY}" "${CKPT}" "${INFERENCE_ROOT_DIR}" "${OUTPUT_BASE_DIR}" "${TOKENIZER_PATH}" "${compress_config}" "${aux_config}"
-    fi
+    # # 根据模型类型选择推理脚本
+    # if [ "$inference_script_type" = "sglang_inference" ]; then
+    #     INFERENCE_CMD="${SGLANG_INFERENCE_SCRIPT}"
+    #     echo "使用 sglang_inference.sh 进行推理"
+    #     bash ${INFERENCE_CMD} "${model_tag}" "${REPETITION_PENALTY}" "${CKPT}" "${INFERENCE_ROOT_DIR}" "${OUTPUT_BASE_DIR}" "${CONDA_SH_PATH}" "${CONDA_ENV_NAME}"
+    # else
+    #     INFERENCE_CMD="${INFERENCE_SCRIPT}"
+    #     echo "使用 inference.sh 进行推理"
+    #     bash ${INFERENCE_CMD} "${model_tag}" "${REPETITION_PENALTY}" "${CKPT}" "${INFERENCE_ROOT_DIR}" "${OUTPUT_BASE_DIR}" "${TOKENIZER_PATH}" "${compress_config}" "${aux_config}"
+    # fi
     
-    if [ $? -ne 0 ]; then
-        echo "❌ ${model_tag} 推理失败"
-        return 1
-    fi
+    # if [ $? -ne 0 ]; then
+    #     echo "❌ ${model_tag} 推理失败"
+    #     return 1
+    # fi
     
     echo "=======✅ ${model_tag} 推理完成 ======="
     
@@ -128,14 +128,13 @@ inference_and_evaluate() {
 
 
 
-
 # ==================== 模型: vanilla ====================
 # train_model "vanilla" "False" "1e-5" "normal" "None" "v1" "8192"
 # if [ $? -ne 0 ]; then
 #     echo "❌ vanilla训练失败，退出"
 #     exit 1
 # fi
-inference_and_evaluate "vanilla" "normal" "inference" "./configs/LightThinker/qwen/v1.json" "None"
+inference_and_evaluate "epl_apa_mtp_w3e-1" "anchor-thought" "inference" "./configs/LightThinker/qwen/v1.json" "None"
 
 # ==================== 模型: epl_apa_mtp_w3e-1 ====================
 # train_model "epl_apa_mtp_w3e-1001" "True" "2e-5" "aug-wo-pc-apa-mtp" "configs/epl_apa_mtp.json" "apa_mtp"

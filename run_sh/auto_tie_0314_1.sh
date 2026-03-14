@@ -127,15 +127,12 @@ inference_and_evaluate() {
 }
 
 
-# ==================== 模型: apa_mtp_w3e-1_wo-epl_0311 ====================
-# train_model "apa_mtp_w3e-1_wo-epl_0311" "False" "2e-5" "aug-wo-pc-apa-mtp" "configs/epl_apa_mtp.json" "apa_mtp" "8192"
-# if [ $? -ne 0 ]; then
-#     echo "❌ apa_mtp_w3e-1_wo-epl_0311训练失败，退出"
-#     exit 1
-# fi
+inference_and_evaluate "apa_mtp_w3e-1_wo-epl" "anchor-thought" "inference" "./configs/LightThinker/qwen/apa_mtp.json"
+
 inference_and_evaluate "vanilla" "normal" "inference" "./configs/LightThinker/qwen/v1.json"
 
 inference_and_evaluate "lightthinker" "anchor-thought" "inference" "./configs/LightThinker/qwen/v1.json"
+
 
 echo ""
 echo "=========================================="

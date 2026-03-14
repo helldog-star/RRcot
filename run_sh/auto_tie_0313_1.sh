@@ -135,6 +135,10 @@ inference_and_evaluate() {
 # fi
 inference_and_evaluate "apa_mtp_w3e-1_wo-epl" "anchor-thought" "inference" "./configs/LightThinker/qwen/apa_mtp.json"
 
+inference_and_evaluate "vanilla" "normal" "inference" "./configs/LightThinker/qwen/v1.json"
+
+inference_and_evaluate "lightthinker" "anchor-thought" "inference" "./configs/LightThinker/qwen/v1.json"
+
 echo ""
 echo "=========================================="
 echo "      ✅ 所有模型训练、推理和评估完成     "

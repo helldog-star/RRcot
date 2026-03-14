@@ -182,6 +182,10 @@ class Evaluator:
                 writer.write(dict(
                     value=metrics['compress_list']
                 ))
+        if metrics['compressed_token_total'] > 0:
+            compress_ratio = round(metrics['cot_token_total'] / metrics['compressed_token_total'], 4)
+        else:
+            compress_ratio = 0.0
         result_list = [
             (f'{"="*30} {self.args.dataset} {"="*30}'),
             (f"acc: {metrics['correct']}/{metrics['total']}"),
@@ -192,7 +196,9 @@ class Evaluator:
             (f"total len: {self.avg(metrics['total_len_list'])}"),
             (f"peak mem: {self.avg(metrics['peak_mem_list'])}"),
             (f"compress: {self.avg(metrics['compress_cnt_list'])}"),
-            (f"{round(metrics['correct']/metrics['total']*100, 2)},{round(sum(metrics['infer_time_list'])/3600, 2)},{int(round(self.avg(metrics['attend_list']),0))},{int(round(self.avg(metrics['output_len_list']), 0))},{int(round(self.avg(metrics['peak_mem_list']),0))},{int(round(self.avg(metrics['compress_cnt_list']),0))}"),
+            (f"compress ratio: {compress_ratio}"),
+            (f"cot/compressed: {metrics['cot_token_total']}/{metrics['compressed_token_total']}"),
+            (f"{round(metrics['correct']/metrics['total']*100, 2)},{round(sum(metrics['infer_time_list'])/3600, 2)},{int(round(self.avg(metrics['attend_list']),0))},{int(round(self.avg(metrics['output_len_list']), 0))},{int(round(self.avg(metrics['peak_mem_list']),0))},{int(round(self.avg(metrics['compress_cnt_list']),0))},{compress_ratio}"),
         ]
         result_path = f'{base_path}/result.txt'
         if not os.path.exists(result_path):
@@ -239,7 +245,9 @@ class Evaluator:
             prompt_len_list=list(),
             output_len_list=list(),
             total_len_list=list(),
-            compress_list=list(),      
+            compress_list=list(),
+            cot_token_total=0,
+            compressed_token_total=0,
         )
 
         pbar = tqdm(total=len(self.eval_data_list))
@@ -272,11 +280,6 @@ class Evaluator:
             prompt_len:int = len(self.tokenizer.tokenizer(prompt, return_tensors=None)['input_ids'])
             output_id_list:List[int] = self.tokenizer.tokenizer(output, return_tensors=None)['input_ids']
             output_len = len(output_id_list)
-            # assert prompt_len == (item['prompt_len'] if 'prompt_len' in item else item['input_len']),\
-            #     f"{prompt_len} != {(item['prompt_len'] if 'prompt_len' in item else item['input_len'])}"
-            # print(output_len, [item['output_len'], prompt_len, item['output_len'] + prompt_len])
-            # assert output_len in [item['output_len'], item['output_len'] + prompt_len], \
-            #     f"{output_len} in {[item['output_len'], item['output_len'] + prompt_len]}"
 
             if self.args.method in CLASS_CACHE:
                 metrics['peak_mem_list'].append(self.args.cache_size)
@@ -286,42 +289,49 @@ class Evaluator:
                         self._cal_max_token(output_id_list, prompt_len)
                     )
                 else:
-                    # print(f"{self._cal_max_token(output_id_list, prompt_len)} != {item['max_token']}")
-                    # input("hh")
-                    # assert self._cal_max_token(output_id_list, prompt_len) == item['max_token'], \
-                    #     f"{self._cal_max_token(output_id_list, prompt_len)} != {item['max_token']}"
                     metrics['peak_mem_list'].append(item['max_token'])
             elif self.args.method in CLASS_NORMAL:
-                metrics['peak_mem_list'].append(output_len+prompt_len)
+                metrics['peak_mem_list'].append(output_len + prompt_len)
             else:
                 assert False
-            
 
+            # anchor-thought 下，把 splitter 从 output_len 中排除
             if self.args.method in CLASS_ANCHOR:
                 output_len = output_len - output.count(self.splitter)
+
             metrics['prompt_len_list'].append(prompt_len)
             metrics['output_len_list'].append(output_len)
-            metrics['total_len_list'].append(output_len+prompt_len)
+            metrics['total_len_list'].append(output_len + prompt_len)
 
-            # 3. Attend (i.e., dependency)
+            # 3. Attend
             attend, frequency = self._cal_attend(
-                len_prompt=prompt_len, 
-                len_output=output_len, 
-                cache_size=self.args.cache_size, 
+                len_prompt=prompt_len,
+                len_output=output_len,
+                cache_size=self.args.cache_size,
                 output_id_list=output_id_list,
             )
             metrics['attend_list'].append(attend)
             if len(frequency) != 0:
                 metrics['compress_list'].extend(frequency)
 
-            # 4. Infer_time
+            # 4. Infer time
             metrics['infer_time_list'].append(item['infer_time'])
 
-            # 5. Compress Cnt
+            # 5. Compress count + compress_ratio 统计
+            comp_events = 0
             if self.args.method in CLASS_ANCHOR:
-                metrics['compress_cnt_list'].append(output.count(self.splitter))
-            if self.args.method in CLASS_TOKEN:
-                metrics['compress_cnt_list'].append(len(output_id_list) // self.comp_config.output_comp_step)
+                comp_events = output.count(self.splitter)
+                metrics['compress_cnt_list'].append(comp_events)
+            elif self.args.method in CLASS_TOKEN:
+                comp_events = len(output_id_list) // self.comp_config.output_comp_step
+                metrics['compress_cnt_list'].append(comp_events)
+
+            # 按你的定义:
+            # 分子 = 全部输出 CoT token 数（使用 output_len，anchor 已去掉 splitter）
+            # 分母 = 全部压缩 token 数（压缩次数 * 每次压缩token数）  
+            if self.args.method in (CLASS_ANCHOR + CLASS_TOKEN):
+                metrics['cot_token_total'] += output_len
+                metrics['compressed_token_total'] += comp_events * self.compress_cnt
 
         if not return_metrics:
             self.print_metrics(metrics)
