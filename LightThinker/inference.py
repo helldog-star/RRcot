@@ -16,6 +16,7 @@ from tokenizer import Tokenizer
 from model_llama import LlamaForCausalLM
 from model_qwen import Qwen2ForCausalLM
 from dataset_reader import GPQAReader, MMLUReader, BBHReader, GSM8KReader, Reader
+from transformers.cache_utils import SepCache
 
 DEBUG:bool=False
 BLOCK:bool=False
@@ -840,7 +841,17 @@ def _prefill_wo_prompt_compression(
             end_offset=None,
             file_name="debug_global.png",
         )
-
+    from transformers.cache_utils import SepCache
+    past_key_values = SepCache(
+        init_cache_size=4,
+        sep_cache_size=128,
+        local_size=256,
+        cache_size=512,
+        separator_token_ids=[13, 11, 30, 0, 26, 25, 220, 197, 198],
+        PADDING_ID=151643,
+        layer_num=28,
+        APPLY_PES_INSIDE=False,
+    )
     # 3. model.forward()
     model_output = model(
         input_ids=torch.as_tensor(
@@ -856,7 +867,7 @@ def _prefill_wo_prompt_compression(
         model_output=model_output, idx=-1,token_utils=token_utils,repetition_penalty=repetition_penalty,tokenizer=tokenizer
     )
 
-    return predicted_token_id, model_output.hidden_states[-1]
+    return predicted_token_id, model_output.hidden_states[-1], past_key_values
     
 @torch.no_grad()
 def _prefill_w_prompt_compression(
@@ -1167,6 +1178,7 @@ def _token_level_generate(
     predicted_token_id:int,
     update_attention_method:str="global",
     repetition_penalty:float=1.0,
+    past_key_values:SepCache=None,
 ) -> Tuple[str, str]:
     
     assert update_attention_method in ["global", "local"]
@@ -1325,6 +1337,7 @@ def _sentence_level_generate(
     update_attention_method:str="global",
     use_EPL:bool=False,
     repetition_penalty:float=1.0,
+    past_key_values:SepCache=None,
 ) -> Tuple[str,str]:
     assert update_attention_method in ["global", "local"]
 
@@ -1341,8 +1354,8 @@ def _sentence_level_generate(
     cot_start = global_start
     cot_end = 0
     van_cot_start = global_start
-    assert local_start == kv_utils.get_cache()._seen_tokens, \
-        f"{local_start} == {kv_utils.get_cache()._seen_tokens}"
+    # assert local_start == kv_utils.get_cache()._seen_tokens, \
+    #     f"{local_start} == {kv_utils.get_cache()._seen_tokens}"
     while predicted_token_id != eos_token_id and new_token_counters < max_new_tokens:
         new_input_ids = [predicted_token_id]
         IS_COMP_MODE:bool = False
@@ -1473,10 +1486,22 @@ def _sentence_level_generate(
 
         # 3. generate new token(本来对这里有疑问的，为什么attention_mask是全0？因为当前只传入了一个token，前面的是kvcache，所以前面正常应该都能看到？
         # 突然看到非压缩时indicator都是None，貌似合理了)
+        from transformers.cache_utils import SepCache
+        # past_key_values = SepCache(
+        #     init_cache_size=4,
+        #     sep_cache_size=128,
+        #     local_size=256,
+        #     cache_size=512,
+        #     separator_token_ids=[13, 11, 30, 0, 26, 25, 220, 197, 198],
+        #     PADDING_ID=151643,
+        #     layer_num=28,
+        #     model_type="qwen",
+        #     device=input_ids.device
+        # )
         model_output = model(
             input_ids=input_ids,
             attention_mask=attention_mask,
-            past_key_values=kv_utils.get_cache(),
+            past_key_values=past_key_values,
             use_cache=True,
             return_dict=True,
             position_ids=position_ids,
@@ -2221,7 +2246,7 @@ def generate(
     kv_utils = KVUtils()
 
     # 1. prefill
-    predicted_token_id, last_hidden_state = prefill(
+    predicted_token_id, last_hidden_state, past_key_values = prefill(
         model=model,
         tokenizer=tokenizer,
         comp_config=comp_config,
@@ -2272,6 +2297,7 @@ def generate(
                 update_attention_method=update_attention_method,
                 use_EPL=use_EPL,
                 repetition_penalty=repetition_penalty,
+                past_key_values=past_key_values,
             )
         else:
 
