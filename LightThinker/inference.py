@@ -593,12 +593,12 @@ class KVUtils:
     """
 
     def __init__(self):
-        self.past_key_values: DynamicCache = DynamicCache()
+        self.past_key_values: SepCache = SepCache()
 
-    def get_cache(self) -> DynamicCache:
+    def get_cache(self) -> SepCache:
         return self.past_key_values
 
-    def set_cache(self, past_key_values:DynamicCache):
+    def set_cache(self, past_key_values:SepCache):
         self.past_key_values = past_key_values
 
     @torch.no_grad()
