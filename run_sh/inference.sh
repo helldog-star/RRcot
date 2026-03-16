@@ -25,10 +25,9 @@ root_dir="$4"
 output_base_dir="$5"
 tokenizer_path="$6"
 compress_config="$7"
-aux_config="$8"
 
 # 根据model_tag自动调整use_EPL：vanilla和lightthinker为false，其余为true
-if [ "$model_tag" = "vanilla" ] || [ "$model_tag" = "lightthinker" ] || [ "$model_tag" = "distill-r1-7b" ] || [ "$model_tag" = "apa_mtp_w3e-1_wo-epl" ]; then
+if [ "$model_tag" = "vanilla" ] || [ "$model_tag" = "lightthinker" ] || [ "$model_tag" = "distill-r1-7b" ] || [ "$model_tag" = "vanilla_sepllm" ] || [ "$model_tag" = "apa_mtp_w3e-1_wo-epl" ]; then
     use_EPL="false"
 else
     use_EPL="true"
@@ -151,7 +150,6 @@ do
             --split_size $split_size \
             --use_EPL $use_EPL \
             --model_path $model_path \
-            --aux_config $aux_config \
             --index $real_index > "${output_tag}/inference_log/${rolling_rope}_${compress_prompt}/${real_index}${prefix}_${model_short_tag}_${ckpt}.txt" 2>&1 &
         
         sleep 5
