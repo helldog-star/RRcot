@@ -594,10 +594,10 @@ class KVUtils:
 
     def __init__(self):
         self.past_key_values: SepCache = SepCache(
-            init_cache_size=4,
-            sep_cache_size=128,
+            init_cache_size=384,
+            sep_cache_size=64,
             local_size=256,
-            cache_size=512,
+            cache_size=1024,
             separator_token_ids=[13, 11, 30, 0, 26, 25, 220, 197, 198],
             PADDING_ID=151643,
             layer_num=28,
@@ -852,10 +852,10 @@ def _prefill_wo_prompt_compression(
         )
     from transformers.cache_utils import SepCache
     past_key_values = SepCache(
-        init_cache_size=4,
-        sep_cache_size=128,
+        init_cache_size=384,
+        sep_cache_size=64,
         local_size=256,
-        cache_size=512,
+        cache_size=1024,
         separator_token_ids=[13, 11, 30, 0, 26, 25, 220, 197, 198],
         PADDING_ID=tokenizer.pad_token_id,
         layer_num=model.config.num_hidden_layers,
