@@ -2434,8 +2434,8 @@ def get_parser():
     parser.add_argument('--use_EPL', type=str2bool, default=False)
     parser.add_argument('--aux_config', type=str, default=None)
     parser.add_argument('--use_h2o', type=str2bool, default=True)
-    parser.add_argument('--h2o_window_length', type=int, default=512)
-    parser.add_argument('--h2o_num_hh_tokens', type=int, default=128)
+    parser.add_argument('--h2o_window_length', type=int, default=2040)
+    parser.add_argument('--h2o_num_hh_tokens', type=int, default=1020)
     parser.add_argument(
         '--datasets',
         type=str,
