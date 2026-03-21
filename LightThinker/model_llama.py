@@ -24,48 +24,23 @@ import torch
 import torch.nn.functional as F
 import torch.utils.checkpoint
 from torch import nn
-from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss, MSELoss
-# from ...activations import ACT2FN
-# from ...cache_utils import Cache, DynamicCache, StaticCache
-# from ...generation import GenerationMixin
-# from ...modeling_attn_mask_utils import AttentionMaskConverter
-# from ...modeling_flash_attention_utils import _flash_attention_forward
-# from ...modeling_outputs import (
-#     BaseModelOutputWithPast,
-#     CausalLMOutputWithPast,
-#     QuestionAnsweringModelOutput,
-#     SequenceClassifierOutputWithPast,
-#     TokenClassifierOutput,
-# )
-# from ...modeling_rope_utils import ROPE_INIT_FUNCTIONS
-# from ...modeling_utils import PreTrainedModel
-# from ...pytorch_utils import ALL_LAYERNORM_LAYERS
-# from ...utils import (
-#     add_code_sample_docstrings,
-#     add_start_docstrings,
-#     add_start_docstrings_to_model_forward,
-#     is_flash_attn_greater_or_equal_2_10,
-#     logging,
-#     replace_return_docstrings,
-# )
-# from .configuration_llama import LlamaConfig
 
-from transformers.activations import ACT2FN
-from transformers.cache_utils import Cache, DynamicCache, StaticCache
-from transformers.generation import GenerationMixin
-from transformers.modeling_attn_mask_utils import AttentionMaskConverter
-from transformers.modeling_flash_attention_utils import _flash_attention_forward
-from transformers.modeling_outputs import (
+from ...activations import ACT2FN
+from ...cache_utils import Cache, DynamicCache, StaticCache
+from ...generation import GenerationMixin
+from ...modeling_attn_mask_utils import AttentionMaskConverter
+from ...modeling_flash_attention_utils import _flash_attention_forward
+from ...modeling_outputs import (
     BaseModelOutputWithPast,
     CausalLMOutputWithPast,
     QuestionAnsweringModelOutput,
     SequenceClassifierOutputWithPast,
     TokenClassifierOutput,
 )
-from transformers.modeling_rope_utils import ROPE_INIT_FUNCTIONS
-from transformers.modeling_utils import PreTrainedModel
-from transformers.pytorch_utils import ALL_LAYERNORM_LAYERS
-from transformers.utils import (
+from ...modeling_rope_utils import ROPE_INIT_FUNCTIONS
+from ...modeling_utils import PreTrainedModel
+from ...pytorch_utils import ALL_LAYERNORM_LAYERS
+from ...utils import (
     add_code_sample_docstrings,
     add_start_docstrings,
     add_start_docstrings_to_model_forward,
@@ -73,8 +48,7 @@ from transformers.utils import (
     logging,
     replace_return_docstrings,
 )
-from transformers.models.llama.configuration_llama import LlamaConfig
-
+from .configuration_llama import LlamaConfig
 
 
 logger = logging.get_logger(__name__)
@@ -301,26 +275,6 @@ def repeat_kv(hidden_states: torch.Tensor, n_rep: int) -> torch.Tensor:
 class LlamaAttention(nn.Module):
     """Multi-headed attention from 'Attention Is All You Need' paper"""
 
-    def add_params(self, q:bool=False, k:bool=False, v:bool=False):
-        self.new_q = q
-        self.new_k = k
-        self.new_v = v
-        if q:
-            print(f"add q for layer {self.layer_idx}")
-            self._q_proj = nn.Linear(self.hidden_size, self.num_heads * self.head_dim, bias=self.config.attention_bias)
-            self._q_proj.weight.data.zero_()
-            self._q_proj._is_hf_initialized = True
-        if k:
-            print(f"add k for layer {self.layer_idx}")
-            self._k_proj = nn.Linear(self.hidden_size, self.num_key_value_heads * self.head_dim, bias=self.config.attention_bias)
-            self._k_proj.weight.data.zero_()
-            self._k_proj._is_hf_initialized = True
-        if v:
-            print(f"add v for layer {self.layer_idx}")
-            self._v_proj = nn.Linear(self.hidden_size, self.num_key_value_heads * self.head_dim, bias=self.config.attention_bias)
-            self._v_proj.weight.data.zero_()
-            self._v_proj._is_hf_initialized = True
-
     def __init__(self, config: LlamaConfig, layer_idx: Optional[int] = None):
         super().__init__()
         self.config = config
@@ -347,10 +301,6 @@ class LlamaAttention(nn.Module):
         self.v_proj = nn.Linear(self.hidden_size, self.num_key_value_heads * self.head_dim, bias=config.attention_bias)
         self.o_proj = nn.Linear(self.num_heads * self.head_dim, self.hidden_size, bias=config.attention_bias)
 
-        self.new_q: bool = False
-        self.new_k: bool = False
-        self.new_v: bool = False
-
         # TODO (joao): remove in v4.46 (RoPE is computed in the model, not in the decoder layers)
         self.rotary_emb = LlamaRotaryEmbedding(config=self.config)
 
@@ -364,8 +314,6 @@ class LlamaAttention(nn.Module):
         use_cache: bool = False,
         cache_position: Optional[torch.LongTensor] = None,
         position_embeddings: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,  # will become mandatory in v4.46
-        row_comp_index: Optional[torch.Tensor]=None,
-        column_comp_index: Optional[torch.Tensor]=None,
         **kwargs,
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
         bsz, q_len, _ = hidden_states.size()
@@ -392,17 +340,6 @@ class LlamaAttention(nn.Module):
             key_states = self.k_proj(hidden_states)
             value_states = self.v_proj(hidden_states)
 
-            # row_comp_index: Optional[torch.Tensor]=None,
-            # column_comp_index: Optional[torch.Tensor]=None,
-
-            if self.new_q:
-                query_states[row_comp_index, column_comp_index] = self._q_proj(hidden_states[row_comp_index, column_comp_index])
-
-            if self.new_k:
-                key_states[row_comp_index, column_comp_index] = self._k_proj(hidden_states[row_comp_index, column_comp_index])
-            if self.new_v:
-                value_states[row_comp_index, column_comp_index] = self._v_proj(hidden_states[row_comp_index, column_comp_index])
-             
         query_states = query_states.view(bsz, q_len, self.num_heads, self.head_dim).transpose(1, 2)
         key_states = key_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
         value_states = value_states.view(bsz, q_len, self.num_key_value_heads, self.head_dim).transpose(1, 2)
@@ -434,6 +371,11 @@ class LlamaAttention(nn.Module):
 
         # upcast attention to fp32
         attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query_states.dtype)
+
+        # H2O-style cache policy: keep heavy-hitters + recent tokens when cache provides slimming API.
+        if past_key_value is not None and hasattr(past_key_value, "update_slimming"):
+            past_key_value.update_slimming(attn_weights, self.num_key_value_groups, self.layer_idx)
+
         attn_weights = nn.functional.dropout(attn_weights, p=self.attention_dropout, training=self.training)
         attn_output = torch.matmul(attn_weights, value_states)
 
@@ -465,6 +407,9 @@ class LlamaFlashAttention2(LlamaAttention):
     Llama flash attention module. This module inherits from `LlamaAttention` as the weights of the module stays
     untouched. The only required change would be on the forward pass where it needs to correctly call the public API of
     flash attention and deal with padding tokens in case the input contains any of them.
+
+    Note: H2O cache policy is NOT supported with Flash Attention 2, as it doesn't expose attention weights.
+    Please use `attn_implementation="eager"` to use H2O cache optimization.
     """
 
     def __init__(self, *args, **kwargs):
@@ -486,6 +431,14 @@ class LlamaFlashAttention2(LlamaAttention):
         cache_position: Optional[torch.LongTensor] = None,
         position_embeddings: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,  # will become mandatory in v4.46
     ) -> Tuple[torch.Tensor, Optional[torch.Tensor], Optional[Tuple[torch.Tensor]]]:
+        # H2O cache is not supported with Flash Attention (no attention weights available)
+        if past_key_value is not None and hasattr(past_key_value, "update_slimming"):
+            logger.warning_once(
+                "H2O cache policy is NOT supported with Flash Attention 2. "
+                "To use H2O cache optimization, please set attn_implementation=\"eager\" in your config or model loading. "
+                "Proceeding with Flash Attention without H2O cache slimming."
+            )
+
         if isinstance(past_key_value, StaticCache):
             raise ValueError(
                 "`static` cache implementation is not compatible with `attn_implementation==flash_attention_2` "
@@ -662,6 +615,17 @@ class LlamaSdpaAttention(LlamaAttention):
         # in SDPA to support both torch.compile's dynamic shapes and full graph options. An inline conditional prevents dynamic shapes from compiling.
         is_causal = True if causal_mask is None and q_len > 1 else False
 
+        # For H2O cache support, we need to compute attention weights explicitly before SDPA
+        # (SDPA doesn't return attention weights)
+        if past_key_value is not None and hasattr(past_key_value, "update_slimming"):
+            attn_weights = torch.matmul(query_states, key_states.transpose(2, 3)) / math.sqrt(self.head_dim)
+            if causal_mask is not None:
+                attn_weights = attn_weights + causal_mask
+            attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query_states.dtype)
+
+            # Apply H2O cache policy
+            past_key_value.update_slimming(attn_weights, self.num_key_value_groups, self.layer_idx)
+
         attn_output = torch.nn.functional.scaled_dot_product_attention(
             query_states,
             key_states,
@@ -707,8 +671,6 @@ class LlamaDecoderLayer(nn.Module):
         use_cache: Optional[bool] = False,
         cache_position: Optional[torch.LongTensor] = None,
         position_embeddings: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,  # will become mandatory in v4.46
-        row_comp_index: Optional[torch.Tensor]=None,
-        column_comp_index: Optional[torch.Tensor]=None,
         **kwargs,
     ) -> Tuple[torch.FloatTensor, Optional[Tuple[torch.FloatTensor, torch.FloatTensor]]]:
         """
@@ -747,8 +709,6 @@ class LlamaDecoderLayer(nn.Module):
             use_cache=use_cache,
             cache_position=cache_position,
             position_embeddings=position_embeddings,
-            row_comp_index=row_comp_index,
-            column_comp_index=column_comp_index,
             **kwargs,
         )
         hidden_states = residual + hidden_states
@@ -902,18 +862,12 @@ class LlamaModel(LlamaPreTrainedModel):
         config: LlamaConfig
     """
 
-    def freeze_embed(self, new_token_cnt:int, origin_length:int):
-        self.origin_length = origin_length
-        self.new_token_cnt = new_token_cnt
-        self.special_embed = nn.Embedding(new_token_cnt, self.config.hidden_size, self.padding_idx)
-
     def __init__(self, config: LlamaConfig):
         super().__init__(config)
         self.padding_idx = config.pad_token_id
         self.vocab_size = config.vocab_size
 
         self.embed_tokens = nn.Embedding(config.vocab_size, config.hidden_size, self.padding_idx)
-        self.special_embed = None
         self.layers = nn.ModuleList(
             [LlamaDecoderLayer(config, layer_idx) for layer_idx in range(config.num_hidden_layers)]
         )
@@ -943,8 +897,6 @@ class LlamaModel(LlamaPreTrainedModel):
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
         cache_position: Optional[torch.LongTensor] = None,
-        row_comp_index: Optional[torch.Tensor]=None,
-        column_comp_index: Optional[torch.Tensor]=None,
     ) -> Union[Tuple, BaseModelOutputWithPast]:
         output_attentions = output_attentions if output_attentions is not None else self.config.output_attentions
         output_hidden_states = (
@@ -964,13 +916,6 @@ class LlamaModel(LlamaPreTrainedModel):
 
         if inputs_embeds is None:
             inputs_embeds = self.embed_tokens(input_ids)
-            # [0, 1, 2]
-            if self.special_embed != None:
-                new_indices = input_ids - self.origin_length
-                # 找到0～new_token_cnt之间的
-                mask = (new_indices >= 0) & (new_indices < self.new_token_cnt)  # [bs, length]
-                new_embeds = self.special_embed(new_indices[mask])
-                inputs_embeds[mask] = new_embeds
 
         # kept for BC (non `Cache` `past_key_values` inputs)
         return_legacy_cache = False
@@ -1022,8 +967,6 @@ class LlamaModel(LlamaPreTrainedModel):
                     use_cache,
                     cache_position,
                     position_embeddings,
-                    row_comp_index,
-                    column_comp_index,
                 )
             else:
                 layer_outputs = decoder_layer(
@@ -1035,8 +978,6 @@ class LlamaModel(LlamaPreTrainedModel):
                     use_cache=use_cache,
                     cache_position=cache_position,
                     position_embeddings=position_embeddings,
-                    row_comp_index=row_comp_index,
-                    column_comp_index=column_comp_index,
                 )
 
             hidden_states = layer_outputs[0]
@@ -1197,31 +1138,8 @@ class LlamaForCausalLM(LlamaPreTrainedModel, GenerationMixin):
         self.vocab_size = config.vocab_size
         self.lm_head = nn.Linear(config.hidden_size, config.vocab_size, bias=False)
 
-        self.mtp_lambda = getattr(config, "mtp_lambda", 1.0)
-
         # Initialize weights and apply final processing
         self.post_init()
-
-    def add_qkv(self, q:bool=False, k:bool=False, v:bool=False):
-        for decoder_layer in self.model.layers:
-            decoder_layer.self_attn.add_params(q, k, v)
-
-    def freeze_embed(self, new_token_cnt:int, origin_length:int):
-        self.model.freeze_embed(new_token_cnt, origin_length)
-        tags = [
-            "_v_proj", 
-            "_q_proj", 
-            "_k_proj",
-            "special_embed"
-        ]
-        for name, param in self.model.named_parameters():
-            requires_grad = False
-            for tag in tags:
-                if tag in name:
-                    requires_grad = True
-                    break
-            param.requires_grad_(requires_grad)
-        self.lm_head.requires_grad_(False)
 
     def get_input_embeddings(self):
         return self.model.embed_tokens
@@ -1257,8 +1175,6 @@ class LlamaForCausalLM(LlamaPreTrainedModel, GenerationMixin):
         return_dict: Optional[bool] = None,
         cache_position: Optional[torch.LongTensor] = None,
         num_logits_to_keep: int = 0,
-        row_comp_index: Optional[torch.Tensor]=None,
-        column_comp_index: Optional[torch.Tensor]=None,
         **loss_kwargs,
     ) -> Union[Tuple, CausalLMOutputWithPast]:
         r"""
@@ -1297,6 +1213,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel, GenerationMixin):
         )
         return_dict = return_dict if return_dict is not None else self.config.use_return_dict
 
+        # decoder outputs consists of (dec_features, layer_state, dec_hidden, dec_attn)
         outputs = self.model(
             input_ids=input_ids,
             attention_mask=attention_mask,
@@ -1308,8 +1225,6 @@ class LlamaForCausalLM(LlamaPreTrainedModel, GenerationMixin):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
             cache_position=cache_position,
-            row_comp_index=row_comp_index,
-            column_comp_index=column_comp_index,
         )
 
         hidden_states = outputs[0]
@@ -1323,58 +1238,7 @@ class LlamaForCausalLM(LlamaPreTrainedModel, GenerationMixin):
 
         loss = None
         if labels is not None:
-            # register_token_index 与 labels 已对齐：1 表示 MTP aux loss 区域
-            register_token_index = loss_kwargs.pop("register_token_index", None)
-
-            if register_token_index is not None:
-
-                register_token_index = register_token_index.to(labels.device).bool()
-                # MTP: register 位置不做 shift，当前位置 logits 直接监督当前位置 label
-                mtp_logits = logits[register_token_index]
-                mtp_labels = labels[register_token_index]
-
-                # LM: 先筛选出非 register token，再在筛选后的序列上做相邻错位
-                non_register_mask = ~register_token_index
-                filtered_lm_logits = logits[non_register_mask]
-                filtered_lm_labels = labels[non_register_mask]
-
-                shift_lm_logits = filtered_lm_logits[:-1].contiguous()
-                shift_lm_labels = filtered_lm_labels[1:].contiguous()
-                # 利用每个 batch 的非 register token 数量构造边界，避免创建 [B, T] 的 batch_idx 大张量
-                non_register_counts = non_register_mask.sum(dim=1)
-                if shift_lm_labels.numel() > 0:
-                    valid_shift_mask = torch.ones(shift_lm_labels.size(0), dtype=torch.bool, device=labels.device)
-                    boundary_pos = non_register_counts.cumsum(dim=0)[:-1] - 1
-                    boundary_pos = boundary_pos[(boundary_pos >= 0) & (boundary_pos < valid_shift_mask.size(0))]
-                    valid_shift_mask[boundary_pos] = False
-                else:
-                    valid_shift_mask = shift_lm_labels.new_zeros((0,), dtype=torch.bool)
-
-                safe_lm_logits = shift_lm_logits[valid_shift_mask]
-                safe_lm_labels = shift_lm_labels[valid_shift_mask]
-
-                zero_loss = logits.sum() * 0.0
-                ce_loss = CrossEntropyLoss(ignore_index=-100)
-                mtp_loss = (
-                    ce_loss(mtp_logits.float(), mtp_labels.to(mtp_logits.device))
-                    if mtp_labels.numel() > 0
-                    else zero_loss
-                )
-                lm_loss = (
-                    ce_loss(safe_lm_logits.float(), safe_lm_labels.to(safe_lm_logits.device))
-                    if safe_lm_labels.numel() > 0
-                    else zero_loss
-                )
-
-                self._last_mtp_loss = mtp_loss.detach().item()
-                self._last_lm_loss = lm_loss.detach().item()
-
-                loss = lm_loss + self.mtp_lambda * mtp_loss
-            
-            else:
-                loss = self.loss_function(logits, labels, self.vocab_size, **loss_kwargs)
-                self._last_lm_loss = loss.detach().item()
-                self._last_mtp_loss = 0.0
+            loss = self.loss_function(logits=logits, labels=labels, vocab_size=self.config.vocab_size, **loss_kwargs)
 
         if not return_dict:
             output = (logits,) + outputs[1:]
