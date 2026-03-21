@@ -393,6 +393,9 @@ class Qwen2FlashAttention2(Qwen2Attention):
     where it needs to correctly call the public API of flash attention and deal with padding tokens
     in case the input contains any of them. Additionally, for sliding window attention, we apply SWA only to the bottom
     config.max_window_layers layers.
+    
+    Note: H2O cache policy is NOT supported with Flash Attention 2, as it doesn't expose attention weights.
+    Please use `attn_implementation="eager"` to use H2O cache optimization.
     """
 
     # Copied from transformers.models.llama.modeling_llama.LlamaFlashAttention2.__init__
@@ -416,6 +419,14 @@ class Qwen2FlashAttention2(Qwen2Attention):
         position_embeddings: Optional[Tuple[torch.Tensor, torch.Tensor]] = None,  # will become mandatory in v4.46
         **kwargs,
     ):
+        # H2O cache is not supported with Flash Attention (no attention weights available)
+        if past_key_value is not None and hasattr(past_key_value, "update_slimming"):
+            logger.warning_once(
+                "H2O cache policy is NOT supported with Flash Attention 2. "
+                "To use H2O cache optimization, please set attn_implementation=\"eager\" in your config or model loading. "
+                "Proceeding with Flash Attention without H2O cache slimming."
+            )
+        
         bsz, q_len, _ = hidden_states.size()
 
         query_states = self.q_proj(hidden_states)
@@ -585,6 +596,18 @@ class Qwen2SdpaAttention(Qwen2Attention):
         # in SDPA to support both torch.compile's dynamic shapes and full graph options. An inline conditional prevents dynamic shapes from compiling.
         # The q_len > 1 is necessary to match with AttentionMaskConverter.to_causal_4d that does not create a causal mask in case q_len == 1.
         is_causal = True if causal_mask is None and q_len > 1 else False
+
+        # For H2O cache support, we need to compute attention weights explicitly before SDPA
+        # (SDPA doesn't return attention weights)
+        if past_key_value is not None and hasattr(past_key_value, "update_slimming"):
+            # Manually compute attention weights for H2O cache slimming
+            attn_weights = torch.matmul(query_states, key_states.transpose(2, 3)) / math.sqrt(self.head_dim)
+            if causal_mask is not None:
+                attn_weights = attn_weights + causal_mask
+            attn_weights = nn.functional.softmax(attn_weights, dim=-1, dtype=torch.float32).to(query_states.dtype)
+            
+            # Apply H2O cache policy
+            past_key_value.update_slimming(attn_weights, self.num_key_value_groups, self.layer_idx)
 
         attn_output = torch.nn.functional.scaled_dot_product_attention(
             query_states,

@@ -33,7 +33,7 @@ INDICATOR_LIST:List[str] = [
 
 
 class H2ODynamicCache(DynamicCache):
-    """Dynamic cache with heavy-hitter + recent-token slimming."""
+    """Dynamic cache with heavy-hitter + recent-token slimming (Official H2O Implementation)."""
 
     def __init__(self, window_length: int, num_hh_tokens: int):
         super().__init__()
@@ -43,52 +43,59 @@ class H2ODynamicCache(DynamicCache):
 
     @torch.no_grad()
     def update_slimming(self, attention_scores: torch.Tensor, num_kv_groups: int, layer_idx: int):
-        # attention_scores: [bs, num_attn_heads, q_len, k_len]
-        score_update = attention_scores.sum(dim=2)[:, ::num_kv_groups, :]
-
+        """
+        Sliming the cache based on accumulated attention scores.
+        Only keep heavy-hitters + local (recent) tokens.
+        
+        From: https://arxiv.org/pdf/2306.14048
+        Reference: https://github.com/meta-llama/llama-cookbook/blob/main/end-to-end-use-cases/long_context/H2O/utils/cache.py
+        """
+        # attention_scores: [bs, num_heads, q_len, k_len]
+        # Sum over query dimension, downsample by kv_groups
         if len(self.accumulated_attention_scores) <= layer_idx:
-            self.accumulated_attention_scores.append(score_update)
+            self.accumulated_attention_scores.append(attention_scores.sum(2)[:,::num_kv_groups, :])
         else:
-            prev_scores = self.accumulated_attention_scores[layer_idx]
             num_new_tokens = attention_scores.shape[2]
-            old_len = max(0, score_update.shape[-1] - num_new_tokens)
-            if old_len > 0 and prev_scores.shape[-1] >= old_len:
-                score_update[:, :, :old_len] += prev_scores[:, :, :old_len]
-            self.accumulated_attention_scores[layer_idx] = score_update
+            updated_attention_scores = attention_scores.sum(2)[:,::num_kv_groups, :]  # [bs, num_heads, k_len]
+            # 累加：新分数的旧位置 += 历史分数（正确的对齐方式！）
+            updated_attention_scores[:, :, :-num_new_tokens] += self.accumulated_attention_scores[layer_idx]
+            self.accumulated_attention_scores[layer_idx] = updated_attention_scores
 
-        seq_len = self.get_seq_length(layer_idx)
-        if seq_len <= self.window_length:
+        # 检查是否需要修剪
+        if self.get_seq_length(layer_idx) <= self.window_length:
             return
 
-        keep_recent = max(1, self.window_length - self.num_hh_tokens)
-        local_start = max(0, seq_len - keep_recent)
-
-        scores = self.accumulated_attention_scores[layer_idx]
-        hh_search_end = local_start
-        hh_k = min(self.num_hh_tokens, hh_search_end)
-
-        if hh_k > 0:
-            hh_scores = scores[:, :, :hh_search_end]
-            keep_hh_idx = torch.topk(hh_scores, hh_k, dim=-1).indices
-            keep_hh_idx = keep_hh_idx.sort(dim=-1).values
-        else:
-            bsz, n_heads, _ = scores.shape
-            keep_hh_idx = torch.empty((bsz, n_heads, 0), dtype=torch.long, device=scores.device)
-
-        keep_local_idx = torch.arange(local_start, seq_len, device=scores.device, dtype=torch.long)
-        keep_local_idx = keep_local_idx.view(1, 1, -1).expand(scores.shape[0], scores.shape[1], -1)
-
+        seq_len = self.get_seq_length(layer_idx)
+        # 在最近的 window_length - num_hh_tokens 之前的部分搜索 heavy-hitter
+        seq_scores = self.accumulated_attention_scores[layer_idx][:, :, :-self.window_length + self.num_hh_tokens]
+        
+        # Top-k heavy-hitter tokens
+        _, keep_hh_idx = torch.topk(seq_scores, self.num_hh_tokens, dim=-1)
+        keep_hh_idx = keep_hh_idx.sort(dim=-1).values  # 排序以保持顺序
+        
+        # Recent tokens（最后的 window_length - num_hh_tokens 个）
+        keep_local_idx = torch.arange(
+            seq_len - (self.window_length - self.num_hh_tokens),
+            seq_len,
+            device=keep_hh_idx.device
+        ).repeat(keep_hh_idx.shape[0], keep_hh_idx.shape[1], 1)
+        
+        # 合并 indices
         keep_idx = torch.cat([keep_hh_idx, keep_local_idx], dim=-1)
-        keep_idx = keep_idx.sort(dim=-1).values
-
-        key_cache = self.key_cache[layer_idx]
-        value_cache = self.value_cache[layer_idx]
-        head_dim = key_cache.shape[-1]
-        gather_idx_kv = keep_idx.unsqueeze(-1).expand(-1, -1, -1, head_dim)
-
-        self.key_cache[layer_idx] = torch.gather(key_cache, dim=2, index=gather_idx_kv)
-        self.value_cache[layer_idx] = torch.gather(value_cache, dim=2, index=gather_idx_kv)
-        self.accumulated_attention_scores[layer_idx] = torch.gather(scores, dim=2, index=keep_idx)
+        
+        # 使用 mask 进行索引（官方方式）
+        mask = torch.zeros(
+            self.accumulated_attention_scores[layer_idx].shape,
+            dtype=torch.bool,
+            device=keep_hh_idx.device
+        )
+        mask = mask.scatter(-1, keep_idx, 1)
+        
+        # 修剪 K/V cache
+        bsz, num_heads, _, head_dim = self.key_cache[layer_idx].shape
+        self.key_cache[layer_idx] = self.key_cache[layer_idx][mask].view(bsz, num_heads, -1, head_dim)
+        self.value_cache[layer_idx] = self.value_cache[layer_idx][mask].view(bsz, num_heads, -1, head_dim)
+        self.accumulated_attention_scores[layer_idx] = self.accumulated_attention_scores[layer_idx][mask].view(bsz, num_heads, -1)
 
 class DebugUtils:
 
@@ -2433,9 +2440,9 @@ def get_parser():
     parser.add_argument('--index', type=int)        
     parser.add_argument('--use_EPL', type=str2bool, default=False)
     parser.add_argument('--aux_config', type=str, default=None)
-    parser.add_argument('--use_h2o', type=str2bool, default=True)
-    parser.add_argument('--h2o_window_length', type=int, default=2040)
-    parser.add_argument('--h2o_num_hh_tokens', type=int, default=1020)
+    parser.add_argument('--use_h2o', type=str2bool, default=False)
+    parser.add_argument('--h2o_window_length', type=int, default=256)
+    parser.add_argument('--h2o_num_hh_tokens', type=int, default=128)
     parser.add_argument(
         '--datasets',
         type=str,
