@@ -2,6 +2,7 @@
 import time
 import argparse
 import jsonlines
+import json
 from typing import *
 from tqdm import tqdm
 import os
@@ -12,14 +13,49 @@ from constant import CLASS_NORMAL, CLASS_CACHE, CLASS_ANCHOR, CLASS_TOKEN
 
 class Reference:
 
-    PATH_TEMPLATE = "./data/eval/{name}.jsonl"
+    PATH_TEMPLATE = "./data/eval/{name}"
 
     def __init__(self, dataset_name:str, interaction:bool):
         self.dataset_name = dataset_name
-        print(self.PATH_TEMPLATE.format(name=dataset_name))
-        self.meta_data_list:List[Dict] = read_jsonl(
-            self.PATH_TEMPLATE.format(name=dataset_name)
-        )
+        jsonl_path = self.PATH_TEMPLATE.format(name=dataset_name) + ".jsonl"
+        json_path = self.PATH_TEMPLATE.format(name=dataset_name) + ".json"
+
+        if os.path.exists(jsonl_path):
+            print(jsonl_path)
+            self.meta_data_list:List[Dict] = read_jsonl(jsonl_path)
+            self.reference_path = jsonl_path
+        elif os.path.exists(json_path):
+            print(json_path)
+            with open(json_path, 'r', encoding='utf-8') as f:
+                raw_data = json.load(f)
+            if isinstance(raw_data, dict):
+                data_list:List[Dict] = []
+                for value in raw_data.values():
+                    if isinstance(value, list):
+                        data_list.extend(value)
+            elif isinstance(raw_data, list):
+                data_list = raw_data
+            else:
+                raise ValueError(f"Unsupported reference format: {json_path}")
+
+            # 适配原始 json 数据到评估所需字段
+            self.meta_data_list = []
+            for i, item in enumerate(data_list):
+                answer = str(item.get('answer', ''))
+                alias = item.get('alias', [answer, "\\text{" + answer + "}"])
+                error = item.get('error', ['error'])
+                normalized = dict(item)
+                normalized['idx'] = item.get('idx', i)
+                normalized['answer'] = answer
+                normalized['alias'] = alias
+                normalized['error'] = error
+                normalized['meta_info'] = item.get('meta_info', item)
+                self.meta_data_list.append(normalized)
+            self.reference_path = json_path
+        else:
+            raise FileNotFoundError(
+                f"Reference file not found, expected one of: {jsonl_path}, {json_path}"
+            )
         self.interaction:bool = interaction
     
     def _digit_compare(self, model_ans:str, gt_ans:str):
@@ -77,8 +113,9 @@ class Reference:
             return self.meta_data_list[idx]['meta_info']['domain']
     
     def update(self):
-        _print(f"updating {self.PATH_TEMPLATE.format(name=self.dataset_name)} ...")
-        with jsonlines.open(self.PATH_TEMPLATE.format(name=self.dataset_name), 'w') as writer:
+        update_path = self.PATH_TEMPLATE.format(name=self.dataset_name) + ".jsonl"
+        _print(f"updating {update_path} ...")
+        with jsonlines.open(update_path, 'w') as writer:
             pbar = tqdm(total=len(self.meta_data_list))
             for item in self.meta_data_list:
                 pbar.update(1)
