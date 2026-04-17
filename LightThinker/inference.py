@@ -149,33 +149,68 @@ class DebugUtils:
 class InferenceUtils:
 
     @classmethod
-    def get_predicted_token_ids(cls, model_output, idx:int=-1,token_utils= None,repetition_penalty:float=1.0,tokenizer=None) -> int:
+    def get_target_logits(
+        cls,
+        model_output,
+        idx:int=-1,
+        token_utils=None,
+        repetition_penalty:float=1.0,
+        tokenizer=None,
+    ) -> torch.Tensor:
         # [bs, seq_length, vocab_size]
-        logits = model_output.logits    
+        logits = model_output.logits
         # [vocab_size]
         target_logits = logits[0, idx, :]
 
-        # 使用transformers实现
+        # Apply repetition penalty on logits when enabled.
         if token_utils is not None and repetition_penalty != 1.0:
-            #获取上下文token
             generated_ids = set(token_utils.show_output_input_ids) | set(token_utils.show_prompt_input_ids)
-            #过滤special token
             if tokenizer is not None:
                 special_ids = set(tokenizer.all_special_ids)
                 generated_ids = generated_ids - special_ids
 
-            if len(generated_ids)>0:
-                #构造tensor
-                input_ids_tensor = torch.tensor([list(generated_ids)],dtype=torch.long,device=target_logits.device)       
-                #构造processor
-                processor=RepetitionPenaltyLogitsProcessor(penalty=repetition_penalty)
-                #处理logits
+            if len(generated_ids) > 0:
+                input_ids_tensor = torch.tensor([list(generated_ids)], dtype=torch.long, device=target_logits.device)
+                processor = RepetitionPenaltyLogitsProcessor(penalty=repetition_penalty)
                 target_logits = target_logits.unsqueeze(0)
-                target_logits = processor(input_ids_tensor,target_logits)
+                target_logits = processor(input_ids_tensor, target_logits)
                 target_logits = target_logits.squeeze(0)
+
+        return target_logits
+
+    @classmethod
+    def get_predicted_token_ids(cls, model_output, idx:int=-1,token_utils= None,repetition_penalty:float=1.0,tokenizer=None) -> int:
+        target_logits = cls.get_target_logits(
+            model_output=model_output,
+            idx=idx,
+            token_utils=token_utils,
+            repetition_penalty=repetition_penalty,
+            tokenizer=tokenizer,
+        )
 
         predicted_token_ids: int = torch.argmax(target_logits).item()
         return predicted_token_ids
+
+    @classmethod
+    def get_predicted_token_and_confidence(
+        cls,
+        model_output,
+        idx:int=-1,
+        token_utils=None,
+        repetition_penalty:float=1.0,
+        tokenizer=None,
+    ) -> Tuple[int, float]:
+        target_logits = cls.get_target_logits(
+            model_output=model_output,
+            idx=idx,
+            token_utils=token_utils,
+            repetition_penalty=repetition_penalty,
+            tokenizer=tokenizer,
+        )
+        probs = torch.softmax(target_logits, dim=-1)
+        predicted_token_id = torch.argmax(target_logits).item()
+        confidence = probs[predicted_token_id].item()
+        return predicted_token_id, confidence
 
 class AttentionUtils:
 
@@ -1250,6 +1285,8 @@ def _sentence_level_generate(
     update_attention_method:str="global",
     use_EPL:bool=False,
     repetition_penalty:float=1.0,
+    seman:bool=False,
+    seman_conf_threshold:float=0.25,
 ) -> Tuple[str,str]:
     assert update_attention_method in ["global", "local"]
 
@@ -1266,6 +1303,8 @@ def _sentence_level_generate(
     cot_start = global_start
     cot_end = 0
     van_cot_start = global_start
+    # The first predicted token comes from prefill; use a neutral confidence placeholder.
+    predicted_token_confidence = 1.0
     assert local_start == kv_utils.get_cache()._seen_tokens, \
         f"{local_start} == {kv_utils.get_cache()._seen_tokens}"
     while predicted_token_id != eos_token_id and new_token_counters < max_new_tokens:
@@ -1274,7 +1313,13 @@ def _sentence_level_generate(
         token_utils.show_output_input_ids.append(predicted_token_id)
         # print(tokenizer.decode(token_utils.show_output_input_ids))
         # 1. construct attention_mask
-        if predicted_token_id == comp_config.split_token_id:
+        if seman:
+            # In seman mode, trigger compression only by low confidence.
+            should_compress = predicted_token_confidence < seman_conf_threshold
+        else:
+            should_compress = predicted_token_id == comp_config.split_token_id
+
+        if should_compress:
             IS_COMP_MODE = True
             if use_EPL:
                 cot_length = int(position_ids[0][0].item()) + 2 - cot_start
@@ -1414,8 +1459,12 @@ def _sentence_level_generate(
             local_start:int = len(token_utils._current_input_ids)
 
         # 5. get new predicted_tokens 151665
-        predicted_token_id:int = InferenceUtils.get_predicted_token_ids(
-            model_output=model_output, idx=-1,token_utils=token_utils,repetition_penalty=repetition_penalty,tokenizer=tokenizer
+        predicted_token_id, predicted_token_confidence = InferenceUtils.get_predicted_token_and_confidence(
+            model_output=model_output,
+            idx=-1,
+            token_utils=token_utils,
+            repetition_penalty=repetition_penalty,
+            tokenizer=tokenizer,
         )
         debug_count += 1
         new_token_counters += 1
@@ -1784,6 +1833,8 @@ def generate(
     use_EPL:bool=False,
     repetition_penalty:float=1.0,
     aux_config:Dict=None,
+    seman:bool=False,
+    seman_conf_threshold:float=0.25,
 ) -> Tuple[str,str]:
 
     assert update_attention_method in ['global', 'local'], update_attention_method
@@ -1841,6 +1892,8 @@ def generate(
                 update_attention_method=update_attention_method,
                 use_EPL=use_EPL,
                 repetition_penalty=repetition_penalty,
+                seman=seman,
+                seman_conf_threshold=seman_conf_threshold,
             )
         else:
             mtp_depth = aux_config.get("mtp_depth", 0)
@@ -1894,6 +1947,8 @@ def get_parser():
     parser.add_argument('--prefill_compress', type=str2bool, default=True)
     parser.add_argument('--compress_prompt', type=str2bool, default=True)
     parser.add_argument('--update_attention_method', type=str, choices=['global', 'local'])
+    parser.add_argument('--seman', type=str2bool, default=False)
+    parser.add_argument('--seman_conf_threshold', type=float, default=0.25)
     # ==============================
 
     parser.add_argument('--split_size', type=int)
@@ -1980,6 +2035,8 @@ def eval_dataset(
     index:int=None,
     use_EPL:bool=False,
     aux_config:Dict=None,
+    seman:bool=False,
+    seman_conf_threshold:float=0.25,
 ):
 
     if split_size != None and index != None:
@@ -2087,6 +2144,8 @@ def eval_dataset(
                 use_EPL=use_EPL,
                 repetition_penalty=repetition_penalty,
                 aux_config=aux_config,
+                seman=seman,
+                seman_conf_threshold=seman_conf_threshold,
             )
             end_time = time.time()
             input_len:int = len(token_utils.show_prompt_input_ids)
@@ -2198,6 +2257,8 @@ def main():
             index=args.index,
             use_EPL=args.use_EPL,
             aux_config=aux_config,
+            seman=args.seman,
+            seman_conf_threshold=args.seman_conf_threshold,
         )
 
 if __name__ == '__main__':
